@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1922524282",
+    "project_id": "vfs-dynamic-app",
+    "storage_bucket": "vfs-dynamic-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1922524282:android:a973d672a1cc36847e87c3",
+        "android_client_info": {
+          "package_name": "com.vfs.dynamic.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDx7d4KDTgef4q5CFSKtO6LAOuScI7iFMo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
