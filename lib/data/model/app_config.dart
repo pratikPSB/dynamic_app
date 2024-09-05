@@ -180,29 +180,29 @@ class TbBorderStyle {
 }
 
 class Screen {
-  final String? id;
+  final String? route;
   final String? pageTitle;
   final List<Field>? fields;
 
   Screen({
-    this.id,
+    this.route,
     this.pageTitle,
     this.fields,
   });
 
   Screen copyWith({
-    String? id,
+    String? route,
     String? pageTitle,
     List<Field>? fields,
   }) =>
       Screen(
-        id: id ?? this.id,
+        route: route ?? this.route,
         pageTitle: pageTitle ?? this.pageTitle,
         fields: fields ?? this.fields,
       );
 
   factory Screen.fromJson(Map<String, dynamic> json) => Screen(
-        id: json["id"],
+        route: json["route"],
         pageTitle: json["page_title"],
         fields: json["fields"] == null
             ? []
@@ -210,7 +210,7 @@ class Screen {
       );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
+        "route": route,
         "page_title": pageTitle,
         "fields": fields == null ? [] : List<dynamic>.from(fields!.map((x) => x.toJson())),
       };
@@ -219,6 +219,8 @@ class Screen {
 class Field {
   final String? component;
   final String? uiComponent;
+  final String? destinationRoute;
+  final String? navigationType;
   final Field? leading;
   final Field? title;
   final String? recognizer;
@@ -246,6 +248,8 @@ class Field {
   Field({
     this.component,
     this.uiComponent,
+    this.destinationRoute,
+    this.navigationType,
     this.leading,
     this.title,
     this.subtitle,
@@ -274,6 +278,8 @@ class Field {
   Field copyWith({
     String? component,
     String? uiComponent,
+    final String? destinationRoute,
+    final String? navigationType,
     Field? leading,
     Field? title,
     Field? subtitle,
@@ -301,6 +307,8 @@ class Field {
       Field(
         component: component ?? this.component,
         uiComponent: uiComponent ?? this.uiComponent,
+        destinationRoute: destinationRoute ?? this.destinationRoute,
+        navigationType: navigationType ?? this.navigationType,
         leading: leading ?? this.leading,
         title: title ?? this.title,
         subtitle: subtitle ?? this.subtitle,
@@ -329,6 +337,8 @@ class Field {
   factory Field.fromJson(Map<String, dynamic> json) => Field(
         component: json["component"],
         uiComponent: json["ui_component"],
+    destinationRoute: json["destination_route"],
+    navigationType: json["navigation_type"],
         leading: json["leading"] == null ? null : Field.fromJson(json["leading"]),
         title: json["title"] == null ? null : Field.fromJson(json["title"]),
         subtitle: json["subtitle"] == null ? null : Field.fromJson(json["subtitle"]),
@@ -362,6 +372,8 @@ class Field {
   Map<String, dynamic> toJson() => {
         "component": component,
         "ui_component": uiComponent,
+        "destination_route": destinationRoute,
+        "navigation_type": navigationType,
         "leading": leading,
         "title": title,
         "subtitle": subtitle,

@@ -33,6 +33,9 @@ dependencies:
 #  svg image loader
   flutter_svg: ^2.0.10+1
 
+#  go router package
+  go_router: ^14.2.7
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:vfs_dynamic_app/data/model/app_config.dart' hide TextStyle;
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
+import 'package:vfs_dynamic_app/data/utils/logger.dart';
 import 'package:vfs_dynamic_app/data/utils/size_config.dart';
 import 'package:vfs_dynamic_app/data/utils/validations.dart';
 
@@ -91,6 +92,7 @@ class _CommonPageState extends State<CommonPage> {
         );
       case 'ListItem':
         return ListTile(
+          onTap: () {},
           leading: (componentData.leading != null) ? buildComponent(componentData.leading!) : null,
           trailing:
               (componentData.trailing != null) ? buildComponent(componentData.trailing!) : null,
@@ -111,11 +113,11 @@ class _CommonPageState extends State<CommonPage> {
       case "asset":
         return SizedBox(
           width: (componentData.style!.width! != 0)
-              ? SizeConfig.imageSizeMultiplier * componentData.style!.width!.toDouble()
-              : SizeConfig.imageSizeMultiplier * componentData.style!.size!.toDouble(),
+              ? componentData.style!.width!.toDouble()
+              : componentData.style!.size!.toDouble(),
           height: (componentData.style!.height! != 0)
-              ? SizeConfig.imageSizeMultiplier * componentData.style!.height!.toDouble()
-              : SizeConfig.imageSizeMultiplier * componentData.style!.size!.toDouble(),
+              ? componentData.style!.height!.toDouble()
+              : componentData.style!.size!.toDouble(),
           child: SvgPicture.asset(
             componentData.path!,
           ),
@@ -123,12 +125,13 @@ class _CommonPageState extends State<CommonPage> {
       case "network":
         return SizedBox(
           width: (componentData.style!.width! != 0)
-              ? SizeConfig.imageSizeMultiplier * componentData.style!.width!.toDouble()
-              : SizeConfig.imageSizeMultiplier * componentData.style!.size!.toDouble(),
+              ? componentData.style!.width!.toDouble()
+              : componentData.style!.size!.toDouble(),
           height: (componentData.style!.height! != 0)
-              ? SizeConfig.imageSizeMultiplier * componentData.style!.height!.toDouble()
-              : SizeConfig.imageSizeMultiplier * componentData.style!.size!.toDouble(),
+              ? componentData.style!.height!.toDouble()
+              : componentData.style!.size!.toDouble(),
           child: SvgPicture.network(
+            fit: BoxFit.fitHeight,
             componentData.path!,
           ),
         );
@@ -277,10 +280,32 @@ class _CommonPageState extends State<CommonPage> {
         );
       case "text":
         return Text(componentData.text!);
-      case "text_span":
+      case "rich_text":
+        List<TextSpan> textSpans = [];
+        for (var span in componentData.childComponents!) {
+          textSpans.add(
+            TextSpan(
+              text: span.text,
+              recognizer: TapGestureRecognizer()
+                ..onTap = (span.recognizer == 'TapGestureRecognizer')
+                    ? () {
+                        performHapticFeedback();
+                        Logger.doLog("PSB TAP.............................");
+                      }
+                    : null,
+              style: TextStyle(
+                color: span.recognizer == 'TapGestureRecognizer' ? Colors.blue : null,
+                decoration:
+                    span.recognizer == 'TapGestureRecognizer' ? TextDecoration.underline : null,
+              ),
+            ),
+          );
+        }
         return RichText(
-            text:
-                TextSpan(text: componentData.text!, recognizer: TapGestureRecognizer()..onTap!()));
+          text: TextSpan(
+            children: textSpans,
+          ),
+        );
       default:
         return Container();
     }
