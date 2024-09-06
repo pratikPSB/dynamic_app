@@ -1,4 +1,5 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../utils/logger.dart';
 
@@ -55,7 +56,7 @@ class FirebaseRemoteConfigService {
     await _setConfigSettings();
     await _setDefaults();
     await _fetchAndActivate();
-    await _registerListener();
+    if(!kIsWeb) await _registerListener();
   }
 
   String getString(String key) => _remoteConfig.getString(key); // NEW
