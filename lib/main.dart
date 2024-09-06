@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:vfs_dynamic_app/common_page.dart';
 import 'package:vfs_dynamic_app/data/model/app_config.dart' hide TextStyle;
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
+import 'package:vfs_dynamic_app/data/utils/logger.dart';
 import 'package:vfs_dynamic_app/data/utils/prefs_utils.dart';
 import 'package:vfs_dynamic_app/unknown_page.dart';
 
@@ -100,10 +101,11 @@ class MyApp extends StatelessWidget {
 
   GoRouter createGoRouter(List<Screen> screensList) {
     return GoRouter(
+
       initialLocation: screensList[0].route, // Set the initial route dynamically if needed
       routes: screensList.map<GoRoute>((screenData) {
         String routeName = screenData.route!;
-
+        Logger.doLog(routeName);
         return GoRoute(
           path: routeName,
           builder: (context, state) => CommonPage(

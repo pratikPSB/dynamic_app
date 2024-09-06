@@ -39,7 +39,7 @@ extension BorderModificatin on num {
 }
 
 extension Go on BuildContext {
-  Future<T?> to<T>(Widget page, {dynamic arguments}) async {
+  /*Future<T?> to<T>(Widget page, {dynamic arguments}) async {
     return Navigator.push<T>(
       this,
       MaterialPageRoute(
@@ -82,7 +82,7 @@ extension Go on BuildContext {
 
   Future<dynamic> pop() async {
     Navigator.pop(this);
-  }
+  }*/
 
   ThemeData getTheme() {
     return Theme.of(this);

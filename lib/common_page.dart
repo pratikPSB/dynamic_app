@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vfs_dynamic_app/data/model/app_config.dart' hide TextStyle;
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
 import 'package:vfs_dynamic_app/data/utils/logger.dart';
@@ -231,7 +232,18 @@ class _CommonPageState extends State<CommonPage> {
 
   handleButtonPress(Field componentData) {
     if (formKey.currentState!.validate()) {
-      if (componentData.callApi == true) {}
+      if (componentData.callApi == true) {
+        if (componentData.destinationRoute != null) {
+          switch (componentData.navigationType) {
+            case "push":
+              context.push(componentData.destinationRoute!);
+            case "pop":
+              if (context.canPop()) {
+                context.pop();
+              }
+          }
+        }
+      }
     }
   }
 

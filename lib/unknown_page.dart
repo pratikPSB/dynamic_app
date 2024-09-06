@@ -12,7 +12,7 @@ class _UnknownPageState extends State<UnknownPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Ohh Not found"),
+        title: Text("404 Not found"),
       ),
       body: Center(
         child: Container(
