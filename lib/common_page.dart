@@ -1,18 +1,16 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vfs_dynamic_app/data/model/app_config.dart' hide TextStyle;
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
-import 'package:vfs_dynamic_app/data/utils/logger.dart';
 import 'package:vfs_dynamic_app/data/utils/size_config.dart';
 import 'package:vfs_dynamic_app/data/utils/validations.dart';
 
+import 'data/model/app_config_new.dart';
+
 class CommonPage extends StatefulWidget {
   final String title;
-  final List<Field> fields;
+  final Screen screenData;
 
-  const CommonPage({super.key, required this.title, required this.fields});
+  const CommonPage({super.key, required this.title, required this.screenData});
 
   @override
   State<CommonPage> createState() => _CommonPageState();
@@ -35,9 +33,17 @@ class _CommonPageState extends State<CommonPage> {
             slivers: [
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  childCount: widget.fields.length,
+                  childCount: widget.screenData.fields!.length,
                   (context, index) {
-                    return buildComponent(widget.fields[index]);
+                    return buildComponent(widget.screenData.fields![index]);
+                  },
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  childCount: widget.screenData.buttons!.length,
+                  (context, index) {
+                    return buildButton(widget.screenData.buttons![index]);
                   },
                 ),
               ),
@@ -49,16 +55,36 @@ class _CommonPageState extends State<CommonPage> {
   }
 
   Widget buildComponent(Field componentData) {
-    switch (componentData.component) {
-      case 'TextBox':
-        return buildTextEntities(componentData);
-      case 'DropDown':
+    switch (componentData.type) {
+      case "edit_text":
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextFormField(
+            validator: (text) => validateEditText(text, componentData.validation!),
+            decoration: InputDecoration(
+              labelText:
+                  (!componentData.required!) ? "${componentData.label} *" : componentData.label,
+              border: OutlineInputBorder(
+                borderRadius: 10.modifyCorners(),
+                borderSide: BorderSide(
+                  color: context.getTheme().primaryColor,
+                ),
+              ),
+              hintText: componentData.label,
+            ),
+            keyboardType: _getInputType(componentData.inputType!),
+            textInputAction: TextInputAction.next,
+          ),
+        );
+      case "text":
+        return Text(componentData.label!);
+      case 'drop_down':
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: DropdownButtonFormField<String>(
             menuMaxHeight: SizeConfig.screenHeight * 0.33,
-            value: componentData.valueList![0],
-            items: (componentData.valueList!)
+            value: componentData.options![0],
+            items: (componentData.options!)
                 .map((value) => DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
@@ -67,102 +93,26 @@ class _CommonPageState extends State<CommonPage> {
             onChanged: (value) {},
           ),
         );
-      case 'Row':
-        return Row(
-          children: componentData.childComponents!
-              .map(
-                (child) => (child.isExpanded == true)
-                    ? Expanded(child: buildComponent(child))
-                    : (child.style!.width! != 0)
-                        ? SizedBox(
-                            width: SizeConfig.widthMultiplier * child.style!.width!,
-                            child: buildComponent(child),
-                          )
-                        : buildComponent(child),
-              )
-              .toList(),
-        );
-      case 'ListView':
-        return ListView(
-          shrinkWrap: true,
-          children: componentData.valueList!.map(
-            (child) {
-              return buildComponent(child);
-            },
-          ).toList(),
-        );
       case 'ListItem':
-        return ListTile(
-          onTap: () {},
-          leading: (componentData.leading != null) ? buildComponent(componentData.leading!) : null,
-          trailing:
-              (componentData.trailing != null) ? buildComponent(componentData.trailing!) : null,
-          title: buildComponent(componentData.title!),
-          subtitle: buildComponent(componentData.subtitle!),
-        );
-      case 'Image':
-        return getImage(componentData);
-      case 'Button':
-        return getButton(componentData);
+        /*TODO implement ListTile in the replacement of Container.*/
+        return Container();
       default:
         return Container();
     }
   }
 
-  Widget getImage(Field componentData) {
-    switch (componentData.type) {
-      case "asset":
-        return SizedBox(
-          width: (componentData.style!.width! != 0)
-              ? componentData.style!.width!.toDouble()
-              : componentData.style!.size!.toDouble(),
-          height: (componentData.style!.height! != 0)
-              ? componentData.style!.height!.toDouble()
-              : componentData.style!.size!.toDouble(),
-          child: SvgPicture.asset(
-            componentData.path!,
-          ),
-        );
-      case "network":
-        return SizedBox(
-          width: (componentData.style!.width! != 0)
-              ? componentData.style!.width!.toDouble()
-              : componentData.style!.size!.toDouble(),
-          height: (componentData.style!.height! != 0)
-              ? componentData.style!.height!.toDouble()
-              : componentData.style!.size!.toDouble(),
-          child: SvgPicture.network(
-            fit: BoxFit.fitHeight,
-            componentData.path!,
-          ),
-        );
-      default:
-        return const SizedBox(
-          height: 5,
-          width: 5,
-        );
-    }
-  }
-
-  getButton(Field componentData) {
+  buildButton(Button componentData) {
     switch (componentData.type) {
       case "filled_button":
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: FilledButton(
-            style: (componentData.style!.decorationColor != null)
-                ? FilledButton.styleFrom(
-                    backgroundColor: Color(
-                      componentData.style!.decorationColor!.getColorHexFromStr(),
-                    ),
-                  )
-                : FilledButton.styleFrom(),
             onPressed: () {
               performHapticFeedback();
               handleButtonPress(componentData);
             },
             child: Text(
-              componentData.text!,
+              componentData.label!,
             ),
           ),
         );
@@ -170,19 +120,12 @@ class _CommonPageState extends State<CommonPage> {
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: OutlinedButton(
-            style: (componentData.style!.decorationColor != null)
-                ? OutlinedButton.styleFrom(
-                    backgroundColor: Color(
-                      componentData.style!.decorationColor!.getColorHexFromStr(),
-                    ),
-                  )
-                : OutlinedButton.styleFrom(),
             onPressed: () {
               performHapticFeedback();
               handleButtonPress(componentData);
             },
             child: Text(
-              componentData.text!,
+              componentData.label!,
             ),
           ),
         );
@@ -190,19 +133,12 @@ class _CommonPageState extends State<CommonPage> {
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextButton(
-            style: (componentData.style!.decorationColor != null)
-                ? TextButton.styleFrom(
-                    backgroundColor: Color(
-                      componentData.style!.decorationColor!.getColorHexFromStr(),
-                    ),
-                  )
-                : TextButton.styleFrom(),
             onPressed: () {
               performHapticFeedback();
               handleButtonPress(componentData);
             },
             child: Text(
-              componentData.text!,
+              componentData.label!,
             ),
           ),
         );
@@ -210,19 +146,12 @@ class _CommonPageState extends State<CommonPage> {
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
-            style: (componentData.style!.decorationColor != null)
-                ? ElevatedButton.styleFrom(
-                    backgroundColor: Color(
-                      componentData.style!.decorationColor!.getColorHexFromStr(),
-                    ),
-                  )
-                : ElevatedButton.styleFrom(),
             onPressed: () {
               performHapticFeedback();
               handleButtonPress(componentData);
             },
             child: Text(
-              componentData.text!,
+              componentData.label!,
               style: TextStyle(color: context.getColorScheme().onPrimary),
             ),
           ),
@@ -230,19 +159,10 @@ class _CommonPageState extends State<CommonPage> {
     }
   }
 
-  handleButtonPress(Field componentData) {
+  handleButtonPress(Button componentData) {
     if (formKey.currentState!.validate()) {
-      if (componentData.callApi == true) {
-        if (componentData.destinationRoute != null) {
-          switch (componentData.navigationType) {
-            case "push":
-              context.push(componentData.destinationRoute!);
-            case "pop":
-              if (context.canPop()) {
-                context.pop();
-              }
-          }
-        }
+      if (componentData.navigationOnSuccess != null) {
+        context.push(componentData.navigationOnSuccess!);
       }
     }
   }
@@ -269,55 +189,7 @@ class _CommonPageState extends State<CommonPage> {
   }
 
   Widget buildTextEntities(Field componentData) {
-    switch (componentData.uiComponent) {
-      case "edit_text":
-        return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextFormField(
-            validator: (text) => validateEmail(text),
-            decoration: InputDecoration(
-              labelText:
-                  (!componentData.isOptional!) ? "${componentData.label} *" : componentData.label,
-              border: OutlineInputBorder(
-                borderRadius: 10.modifyCorners(),
-                borderSide: BorderSide(
-                  color: context.getTheme().primaryColor,
-                ),
-              ),
-              hintText: componentData.hint,
-            ),
-            keyboardType: _getInputType(componentData.inputType!),
-            textInputAction: _getActionType(componentData.actionType!),
-          ),
-        );
-      case "text":
-        return Text(componentData.text!);
-      case "rich_text":
-        List<TextSpan> textSpans = [];
-        for (var span in componentData.childComponents!) {
-          textSpans.add(
-            TextSpan(
-              text: span.text,
-              recognizer: TapGestureRecognizer()
-                ..onTap = (span.recognizer == 'TapGestureRecognizer')
-                    ? () {
-                        performHapticFeedback();
-                        Logger.doLog("PSB TAP.............................");
-                      }
-                    : null,
-              style: TextStyle(
-                color: span.recognizer == 'TapGestureRecognizer' ? Colors.blue : null,
-                decoration:
-                    span.recognizer == 'TapGestureRecognizer' ? TextDecoration.underline : null,
-              ),
-            ),
-          );
-        }
-        return RichText(
-          text: TextSpan(
-            children: textSpans,
-          ),
-        );
+    switch (componentData.type) {
       default:
         return Container();
     }

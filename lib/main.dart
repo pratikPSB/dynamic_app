@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vfs_dynamic_app/common_page.dart';
-import 'package:vfs_dynamic_app/data/model/app_config.dart' hide TextStyle;
+import 'package:vfs_dynamic_app/data/model/app_config.dart' hide TextStyle, Screen;
+import 'package:vfs_dynamic_app/data/model/app_config_new.dart';
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
 import 'package:vfs_dynamic_app/data/utils/logger.dart';
 import 'package:vfs_dynamic_app/data/utils/prefs_utils.dart';
@@ -17,6 +18,7 @@ import 'data/utils/theme_utils.dart';
 import 'firebase_options.dart';
 
 AppConfigModel? appConfigModel;
+AppConfigNewModel? appConfigNewModel;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,9 +40,11 @@ class MyApp extends StatelessWidget {
     ThemeUtils.changeTheme(false);
     ConstFunctions.enableHapticFeedback();
 
-    String appConfigString =
-        FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appConfig);
+    String appConfigString = FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appConfig);
     appConfigModel = appConfigModelFromJson(appConfigString);
+
+    String appConfigNewString = FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appConfigNew);
+    appConfigNewModel = appConfigNewModelFromJson(appConfigNewString);
 
     ColorScheme lightColorScheme = SeedColorScheme.fromSeeds(
       brightness: Brightness.light,
@@ -68,7 +72,7 @@ class MyApp extends StatelessWidget {
       color: Colors.white,
     );
 
-    final router = createGoRouter(appConfigModel!.screens!);
+    final router = createGoRouter(appConfigNewModel!.screens!);
 
     return ValueListenableBuilder(
       valueListenable: ThemeUtils.notifier,
@@ -101,7 +105,6 @@ class MyApp extends StatelessWidget {
 
   GoRouter createGoRouter(List<Screen> screensList) {
     return GoRouter(
-
       initialLocation: screensList[0].route, // Set the initial route dynamically if needed
       routes: screensList.map<GoRoute>((screenData) {
         String routeName = screenData.route!;
@@ -109,8 +112,8 @@ class MyApp extends StatelessWidget {
         return GoRoute(
           path: routeName,
           builder: (context, state) => CommonPage(
-            title: screenData.pageTitle!,
-            fields: screenData.fields!,
+            title: screenData.title!,
+            screenData: screenData,
           ),
         );
       }).toList(),
