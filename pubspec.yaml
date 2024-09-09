@@ -36,6 +36,12 @@ dependencies:
 #  go router package
   go_router: ^14.2.7
 
+# pdf viewer
+  syncfusion_flutter_pdfviewer: ^26.2.13
+
+# file picker
+  file_picker: ^8.0.7
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

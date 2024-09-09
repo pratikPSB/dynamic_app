@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vfs_dynamic_app/common_page.dart';
-import 'package:vfs_dynamic_app/data/model/app_config.dart' hide TextStyle, Screen;
+import 'package:vfs_dynamic_app/data/model/app_config.dart'
+    hide TextStyle, Screen;
 import 'package:vfs_dynamic_app/data/model/app_config_new.dart';
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
 import 'package:vfs_dynamic_app/data/utils/logger.dart';
@@ -40,35 +41,45 @@ class MyApp extends StatelessWidget {
     ThemeUtils.changeTheme(false);
     ConstFunctions.enableHapticFeedback();
 
-    String appConfigString = FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appConfig);
+    String appConfigString = FirebaseRemoteConfigService()
+        .getString(FirebaseRemoteConfigKeys.appConfig);
     appConfigModel = appConfigModelFromJson(appConfigString);
 
-    String appConfigNewString = FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appConfigNew);
+    String appConfigNewString = FirebaseRemoteConfigService()
+        .getString(FirebaseRemoteConfigKeys.appConfigNew);
     appConfigNewModel = appConfigNewModelFromJson(appConfigNewString);
 
     ColorScheme lightColorScheme = SeedColorScheme.fromSeeds(
       brightness: Brightness.light,
-      primaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.primary!.getColorHexFromStr()),
-      secondaryKey:
-          Color(appConfigModel!.appTheme!.lightThemeColors!.secondary!.getColorHexFromStr()),
-      tertiaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.tertiary!.getColorHexFromStr()),
+      primaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.primary!
+          .getColorHexFromStr()),
+      secondaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.secondary!
+          .getColorHexFromStr()),
+      tertiaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.tertiary!
+          .getColorHexFromStr()),
       tones: FlexTones.vivid(Brightness.light),
     );
 
     ColorScheme darkColorScheme = SeedColorScheme.fromSeeds(
       brightness: Brightness.dark,
-      primaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.primary!.getColorHexFromStr()),
-      secondaryKey:
-          Color(appConfigModel!.appTheme!.darkThemeColors!.secondary!.getColorHexFromStr()),
-      tertiaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.tertiary!.getColorHexFromStr()),
+      primaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.primary!
+          .getColorHexFromStr()),
+      secondaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.secondary!
+          .getColorHexFromStr()),
+      tertiaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.tertiary!
+          .getColorHexFromStr()),
       tones: FlexTones.vivid(Brightness.dark),
     );
 
-    TextStyle styleLight = GoogleFonts.getFont(appConfigModel!.appTheme!.textStyle!.font!).copyWith(
+    TextStyle styleLight =
+        GoogleFonts.getFont(appConfigModel!.appTheme!.textStyle!.font!)
+            .copyWith(
       color: Colors.black,
     );
 
-    TextStyle styleDark = GoogleFonts.getFont(appConfigModel!.appTheme!.textStyle!.font!).copyWith(
+    TextStyle styleDark =
+        GoogleFonts.getFont(appConfigModel!.appTheme!.textStyle!.font!)
+            .copyWith(
       color: Colors.white,
     );
 
@@ -105,7 +116,8 @@ class MyApp extends StatelessWidget {
 
   GoRouter createGoRouter(List<Screen> screensList) {
     return GoRouter(
-      initialLocation: screensList[0].route, // Set the initial route dynamically if needed
+      initialLocation:
+          screensList[1].route, // Set the initial route dynamically if needed
       routes: screensList.map<GoRoute>((screenData) {
         String routeName = screenData.route!;
         Logger.doLog(routeName);
