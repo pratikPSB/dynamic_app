@@ -20,8 +20,7 @@ class _FilePickerDemoState extends State<FilePickerDemo> {
   String? selectedFileType;
   String? pdfPath;
 
-  // DynamicAppConfigModel appConfigModel = DynamicAppConfigModel();
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
