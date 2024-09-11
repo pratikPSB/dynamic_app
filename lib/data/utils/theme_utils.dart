@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:vfs_dynamic_app/data/model/app_config.dart' as app_config_model;
+import 'package:vfs_dynamic_app/data/model/app_config_model.dart' as app_config_model;
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
 import 'package:vfs_dynamic_app/data/utils/prefs_utils.dart';
 

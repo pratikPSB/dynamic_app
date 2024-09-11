@@ -1,4 +1,4 @@
-import 'package:vfs_dynamic_app/data/model/app_config_new.dart';
+import 'package:vfs_dynamic_app/data/model/app_screens_model.dart';
 
 String? validateEditText(String? value, Validation validation) {
   switch (validation.type) {

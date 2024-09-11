@@ -1,11 +1,6 @@
-import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:vfs_dynamic_app/data/model/country_response_model.dart';
 import 'package:vfs_dynamic_app/data/model/file_model.dart';
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
 import 'package:vfs_dynamic_app/data/utils/logger.dart';
@@ -13,7 +8,9 @@ import 'package:vfs_dynamic_app/data/utils/size_config.dart';
 import 'package:vfs_dynamic_app/data/utils/validations.dart';
 import 'package:vfs_dynamic_app/file_picker_widget.dart';
 
-import 'data/model/app_config_new.dart';
+import 'data/model/app_screens_model.dart';
+import 'data/services/api_service/api_result.dart';
+import 'data/services/api_service/local_end_api_service.dart';
 
 class CommonPage extends StatefulWidget {
   final String title;
@@ -34,6 +31,12 @@ class _CommonPageState extends State<CommonPage> {
   final formKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+    callInitialAPIs();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -49,8 +52,7 @@ class _CommonPageState extends State<CommonPage> {
                 delegate: SliverChildBuilderDelegate(
                   childCount: widget.screenData.fields!.length,
                   (context, index) {
-                    return buildComponent(
-                        widget.screenData.fields![index], index);
+                    return buildComponent(widget.screenData.fields![index], index);
                   },
                 ),
               ),
@@ -75,12 +77,10 @@ class _CommonPageState extends State<CommonPage> {
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextFormField(
-            validator: (text) =>
-                validateEditText(text, componentData.validation!),
+            validator: (text) => validateEditText(text, componentData.validation!),
             decoration: InputDecoration(
-              labelText: (!componentData.required!)
-                  ? "${componentData.label} *"
-                  : componentData.label,
+              labelText:
+                  (!componentData.required!) ? "${componentData.label} *" : componentData.label,
               border: OutlineInputBorder(
                 borderRadius: 10.modifyCorners(),
                 borderSide: BorderSide(
@@ -115,9 +115,9 @@ class _CommonPageState extends State<CommonPage> {
           componentData: componentData,
           index: index,
           onFilePicked: (file) {
-            for (FileModel filemodel in widget.fileList) {
-              if (filemodel.index == file.index) {
-                widget.fileList.remove(filemodel);
+            for (FileModel fileModel in widget.fileList) {
+              if (fileModel.index == file.index) {
+                widget.fileList.remove(fileModel);
                 break;
               }
             }
@@ -207,20 +207,36 @@ class _CommonPageState extends State<CommonPage> {
     }
   }
 
-  TextInputAction _getActionType(String inputType) {
-    switch (inputType) {
-      case 'action_next':
-        return TextInputAction.next;
-      case 'action_done':
-      default:
-        return TextInputAction.done;
-    }
-  }
-
-  Widget buildTextEntities(Field componentData) {
-    switch (componentData.type) {
-      default:
-        return Container();
+  callInitialAPIs() async {
+    for (On pageLoad in widget.screenData.onPageLoad!) {
+      switch (pageLoad.method) {
+        case "GET":
+          ApiResult<dynamic> response =
+              await LocalApiService().getApiCall(pageLoad.apiEndPoint!, showLoaderDialog: true);
+          if (response.data != null) {
+            CountryResponseModel model = countryResponseModelFromJson(response.data!);
+            List<String> countryNames = [];
+            model.extraData!.forEach((country) {
+              if (!country.isDeleted!) {
+                countryNames.add(country.countryName!);
+              }
+            });
+            for (Field field in widget.screenData.fields!) {
+              if (field.name == pageLoad.targetField) {
+                switch (field.type) {
+                  case "drop_down":
+                    setState(() {
+                      field.options = countryNames;
+                    });
+                    break;
+                }
+                break;
+              }
+            }
+          } else if (response.getException != null) {
+            Logger.doLog("CountrySelectionController : initState");
+          }
+      }
     }
   }
 }

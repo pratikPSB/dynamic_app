@@ -4,25 +4,25 @@
 
 import 'dart:convert';
 
-AppConfigNewModel appConfigNewModelFromJson(String str) => AppConfigNewModel.fromJson(json.decode(str));
+AppScreensModel appConfigNewModelFromJson(String str) => AppScreensModel.fromJson(json.decode(str));
 
-String appConfigNewModelToJson(AppConfigNewModel data) => json.encode(data.toJson());
+String appConfigNewModelToJson(AppScreensModel data) => json.encode(data.toJson());
 
-class AppConfigNewModel {
+class AppScreensModel {
   final List<Screen>? screens;
 
-  AppConfigNewModel({
+  AppScreensModel({
     this.screens,
   });
 
-  AppConfigNewModel copyWith({
+  AppScreensModel copyWith({
     List<Screen>? screens,
   }) =>
-      AppConfigNewModel(
+      AppScreensModel(
         screens: screens ?? this.screens,
       );
 
-  factory AppConfigNewModel.fromJson(Map<String, dynamic> json) => AppConfigNewModel(
+  factory AppScreensModel.fromJson(Map<String, dynamic> json) => AppScreensModel(
     screens: json["screens"] == null ? [] : List<Screen>.from(json["screens"]!.map((x) => Screen.fromJson(x))),
   );
 
@@ -99,7 +99,7 @@ class Screen {
 class Button {
   final String? type;
   final String? label;
-  final String? action;
+  final String? apiEndPoint;
   final String? method;
   final String? navigationOnSuccess;
   final NavigationOnFailure? navigationOnFailure;
@@ -107,7 +107,7 @@ class Button {
   Button({
     this.type,
     this.label,
-    this.action,
+    this.apiEndPoint,
     this.method,
     this.navigationOnSuccess,
     this.navigationOnFailure,
@@ -116,7 +116,7 @@ class Button {
   Button copyWith({
     String? type,
     String? label,
-    String? action,
+    String? apiEndPoint,
     String? method,
     String? navigationOnSuccess,
     NavigationOnFailure? navigationOnFailure,
@@ -124,7 +124,7 @@ class Button {
       Button(
         type: type ?? this.type,
         label: label ?? this.label,
-        action: action ?? this.action,
+        apiEndPoint: apiEndPoint ?? this.apiEndPoint,
         method: method ?? this.method,
         navigationOnSuccess: navigationOnSuccess ?? this.navigationOnSuccess,
         navigationOnFailure: navigationOnFailure ?? this.navigationOnFailure,
@@ -133,7 +133,7 @@ class Button {
   factory Button.fromJson(Map<String, dynamic> json) => Button(
     type: json["type"],
     label: json["label"],
-    action: json["action"],
+    apiEndPoint: json["api_end_point"],
     method: json["method"],
     navigationOnSuccess: json["navigationOnSuccess"],
     navigationOnFailure: json["navigationOnFailure"] == null ? null : NavigationOnFailure.fromJson(json["navigationOnFailure"]),
@@ -142,7 +142,7 @@ class Button {
   Map<String, dynamic> toJson() => {
     "type": type,
     "label": label,
-    "action": action,
+    "api_end_point": apiEndPoint,
     "method": method,
     "navigationOnSuccess": navigationOnSuccess,
     "navigationOnFailure": navigationOnFailure?.toJson(),
@@ -192,7 +192,7 @@ class Field {
   final String? inputType;
   final String? preloadApi;
   final Validation? validation;
-  final List<String>? options;
+  List<String>? options;
 
   Field({
     this.type,
@@ -303,40 +303,40 @@ class Validation {
 }
 
 class On {
-  final String? action;
+  final String? apiEndPoint;
   final String? method;
   final String? description;
   final String? targetField;
 
   On({
-    this.action,
+    this.apiEndPoint,
     this.method,
     this.description,
     this.targetField,
   });
 
   On copyWith({
-    String? action,
+    String? apiEndPoint,
     String? method,
     String? description,
     String? targetField,
   }) =>
       On(
-        action: action ?? this.action,
+        apiEndPoint: apiEndPoint ?? this.apiEndPoint,
         method: method ?? this.method,
         description: description ?? this.description,
         targetField: targetField ?? this.targetField,
       );
 
   factory On.fromJson(Map<String, dynamic> json) => On(
-    action: json["action"],
+    apiEndPoint: json["api_end_point"],
     method: json["method"],
     description: json["description"],
     targetField: json["targetField"],
   );
 
   Map<String, dynamic> toJson() => {
-    "action": action,
+    "api_end_point": apiEndPoint,
     "method": method,
     "description": description,
     "targetField": targetField,

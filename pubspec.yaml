@@ -42,15 +42,31 @@ dependencies:
 # file picker
   file_picker: ^8.0.7
 
+  #  for api call
+  dio: ^5.5.0+1
+  pretty_dio_logger: ^1.4.0
+  json_annotation: ^4.9.0
+  connectivity_plus: ^6.0.4
+
+  # encrypt
+  encrypt: ^5.0.3
+  pointycastle: ^3.9.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.11
+  json_serializable: ^6.7.1
 
 flutter:
 
   uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/sec/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
