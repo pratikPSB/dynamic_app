@@ -9,7 +9,7 @@ String? validateEditText(String? value, Validation validation) {
     case "password":
       return validatePassword(value, message: validation.errorMessage);
     default:
-      return null;
+      return validateName(value, message: validation.errorMessage);
   }
 }
 

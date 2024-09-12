@@ -15,18 +15,15 @@ class LocalEndPoints {
 }
 
 class LocalApiService {
-  // final DioService _apiClient =      DioService(baseUrl: appConfigModel!.appConfigData!.applicationBaseUrl!);
-  final DioService _apiClient =
-      DioService(baseUrl: appConfigModel!.appConfigData!.mockServerUrl!);
+  // final DioService _apiClient = DioService(baseUrl: appConfigModel!.appConfigData!.applicationBaseUrl!);
+  DioService apiClient;
   final ConnectivityService _connectivityService = ConnectivityService();
 
-  static final LocalApiService _instance = LocalApiService._internal();
+  LocalApiService({required this.apiClient});
 
-  factory LocalApiService() {
-    return _instance;
+  factory LocalApiService.getApiService(DioService apiClient) {
+    return LocalApiService(apiClient: apiClient);
   }
-
-  LocalApiService._internal();
 
   String getCurrentDateTimeHeader() {
     final now = DateTime.now();
@@ -59,7 +56,7 @@ class LocalApiService {
           ConstKeys.origin: appConfigModel!.appConfigData!.appointmentUrlOrigin,
           ConstKeys.clientSource: getCurrentDateTimeHeader(),
         };
-        dynamic response = await _apiClient.get(
+        dynamic response = await apiClient.get(
           endpoint: endPoint,
           headers: headers,
           queries: queries,
@@ -110,7 +107,7 @@ class LocalApiService {
           ConstKeys.clientSource: getCurrentDateTimeHeader(),
         };
 
-        dynamic response = await _apiClient.post(
+        dynamic response = await apiClient.post(
           endpoint: endPoint,
           headers: headers,
           data: data,

@@ -7,18 +7,18 @@ import 'package:vfs_dynamic_app/data/utils/logger.dart';
 import 'package:vfs_dynamic_app/data/utils/size_config.dart';
 import 'package:vfs_dynamic_app/data/utils/validations.dart';
 import 'package:vfs_dynamic_app/file_picker_widget.dart';
+import 'package:vfs_dynamic_app/main.dart';
 
 import 'data/model/app_screens_model.dart';
+import 'data/model/text_controller_model.dart';
 import 'data/services/api_service/api_result.dart';
 import 'data/services/api_service/local_end_api_service.dart';
 
 class CommonPage extends StatefulWidget {
   final String title;
   final Screen screenData;
-  final List<FileModel> fileList = [];
-  final Map<String, dynamic> jsonData = {};
 
-  CommonPage({
+  const CommonPage({
     super.key,
     required this.title,
     required this.screenData,
@@ -30,6 +30,9 @@ class CommonPage extends StatefulWidget {
 
 class _CommonPageState extends State<CommonPage> {
   final formKey = GlobalKey<FormState>();
+  final List<FileModel> fileList = [];
+  final List<TextControllerModel> textControllerList = [];
+  final Map<String, dynamic> jsonData = {};
 
   @override
   void initState() {
@@ -38,7 +41,17 @@ class _CommonPageState extends State<CommonPage> {
   }
 
   @override
+  void dispose() {
+    for (TextControllerModel controller in textControllerList) {
+      controller.controller.dispose();
+    }
+    textControllerList.clear();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    textControllerList.clear();
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -53,8 +66,8 @@ class _CommonPageState extends State<CommonPage> {
                 delegate: SliverChildBuilderDelegate(
                   childCount: widget.screenData.fields!.length,
                   (context, index) {
-                    return buildComponent(
-                        widget.screenData.fields![index], index);
+                    buildTextControllerList(index);
+                    return buildComponent(widget.screenData.fields![index], index);
                   },
                 ),
               ),
@@ -73,18 +86,44 @@ class _CommonPageState extends State<CommonPage> {
     );
   }
 
+  buildTextControllerList(int index) {
+    if (widget.screenData.fields![index].type == "edit_text" ||
+        widget.screenData.fields![index].type == "drop_down") {
+      if (widget.screenData.fields![index].type == "drop_down") {
+        textControllerList.add(
+          TextControllerModel(
+            controller: TextEditingController(
+                text: widget.screenData.fields![index].options![0]),
+            elementName: widget.screenData.fields![index].name!,
+            index: index,
+          ),
+        );
+      } else {
+        textControllerList.add(
+          TextControllerModel(
+            controller: TextEditingController(),
+            elementName: widget.screenData.fields![index].name!,
+            index: index,
+          ),
+        );
+      }
+    }
+  }
+
   Widget buildComponent(Field componentData, int index) {
     switch (componentData.type) {
       case "edit_text":
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextFormField(
-            validator: (text) =>
-                validateEditText(text, componentData.validation!),
+            controller:
+                textControllerList.lastWhere((element) => (element.index == index)).controller,
+            validator: (text) => (!componentData.required!)
+                ? null
+                : validateEditText(text, componentData.validation!),
             decoration: InputDecoration(
-              labelText: (!componentData.required!)
-                  ? "${componentData.label} *"
-                  : componentData.label,
+              labelText:
+                  (componentData.required!) ? "${componentData.label} *" : componentData.label,
               border: OutlineInputBorder(
                 borderRadius: 10.modifyCorners(),
                 borderSide: BorderSide(
@@ -98,7 +137,10 @@ class _CommonPageState extends State<CommonPage> {
           ),
         );
       case "text":
-        return Text(componentData.label!);
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(componentData.label!),
+        );
       case 'drop_down':
         return Padding(
           padding: const EdgeInsets.all(8.0),
@@ -111,7 +153,10 @@ class _CommonPageState extends State<CommonPage> {
                       child: Text(value),
                     ))
                 .toList(),
-            onChanged: (value) {},
+            onChanged: (value) {
+              textControllerList.lastWhere((element) => (element.index == index)).controller.text =
+                  value!;
+            },
           ),
         );
       case 'file':
@@ -119,15 +164,15 @@ class _CommonPageState extends State<CommonPage> {
           componentData: componentData,
           index: index,
           onFilePicked: (file) {
-            for (FileModel fileModel in widget.fileList) {
+            for (FileModel fileModel in fileList) {
               if (fileModel.index == file.index) {
-                widget.fileList.remove(fileModel);
+                fileList.remove(fileModel);
                 break;
               }
             }
-            widget.fileList.add(file);
-            widget.jsonData[componentData.name!] = file.file.name;
-            Logger.doLog("${widget.fileList.length}");
+            fileList.add(file);
+            jsonData[componentData.name!] = file.file.name;
+            Logger.doLog("${fileList.length}");
           },
         );
       default:
@@ -196,14 +241,31 @@ class _CommonPageState extends State<CommonPage> {
   handleButtonPress(Button componentData) async {
     if (formKey.currentState!.validate()) {
       if (componentData.navigationOnSuccess != null) {
-        if (componentData.apiEndPoint != "" && componentData.method != "") {
+        if (componentData.apiEndPoint != "" && componentData.apiEndPoint != "") {
           if (componentData.method == "POST") {
-            ApiResult<dynamic> response1 = await LocalApiService()
-                .postApiCall(componentData.apiEndPoint!, widget.jsonData);
-            Logger.doLog("RESPONSE : ${response1.data}");
+            fillJsonData();
+            if (jsonData.isNotEmpty) {
+              ApiResult<dynamic> response1 = await LocalApiService.getApiService(mockServerService)
+                  .postApiCall(componentData.apiEndPoint!, jsonData);
+              Logger.doLog("RESPONSE : ${response1.data}");
+            }
           }
         }
         context.push(componentData.navigationOnSuccess!);
+      }
+    }
+  }
+
+  void fillJsonData() {
+    if (textControllerList.isNotEmpty) {
+      for (var field in widget.screenData.fields!) {
+        if (field.type == "edit_text" || field.type == "drop_down") {
+          for (var element in textControllerList) {
+            if (element.elementName == field.name!) {
+              jsonData[field.name!] = element.controller.text;
+            }
+          }
+        }
       }
     }
   }
@@ -223,18 +285,19 @@ class _CommonPageState extends State<CommonPage> {
     for (On pageLoad in widget.screenData.onPageLoad!) {
       switch (pageLoad.method) {
         case "GET":
-          ApiResult<dynamic> response = await LocalApiService()
-              .getApiCall(pageLoad.apiEndPoint!, showLoaderDialog: true);
-
+          ApiResult<dynamic> response =
+              await LocalApiService.getApiService(liveServerService).getApiCall(
+            pageLoad.apiEndPoint!,
+            showLoaderDialog: true,
+          );
           if (response.data != null) {
-            CountryResponseModel model =
-                countryResponseModelFromJson(response.data!);
+            CountryResponseModel model = countryResponseModelFromJson(response.data!);
             List<String> countryNames = [];
-            model.extraData!.forEach((country) {
+            for (var country in model.extraData!) {
               if (!country.isDeleted!) {
                 countryNames.add(country.countryName!);
               }
-            });
+            }
             for (Field field in widget.screenData.fields!) {
               if (field.name == pageLoad.targetField) {
                 switch (field.type) {

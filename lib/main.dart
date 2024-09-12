@@ -12,6 +12,7 @@ import 'package:vfs_dynamic_app/data/utils/prefs_utils.dart';
 import 'package:vfs_dynamic_app/unknown_page.dart';
 
 import 'data/constants/const_functions.dart';
+import 'data/services/api_service/api_client.dart';
 import 'data/services/remote_config_service/firebase_remote_config_service.dart';
 import 'data/utils/encrypt_decrypt_rsa.dart';
 import 'data/utils/size_config.dart';
@@ -20,6 +21,8 @@ import 'firebase_options.dart';
 
 AppConfigModel? appConfigModel;
 AppScreensModel? appScreensModel;
+late DioService liveServerService;
+late DioService mockServerService;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +46,9 @@ class MyApp extends StatelessWidget {
     String appConfigString =
         FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appConfig);
     appConfigModel = appConfigModelFromJson(appConfigString);
+
+    liveServerService = DioService(baseUrl: appConfigModel!.appConfigData!.applicationBaseUrl!);
+    mockServerService = DioService(baseUrl: appConfigModel!.appConfigData!.mockServerUrl!);
 
     String appConfigNewString =
         FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appScreens);
