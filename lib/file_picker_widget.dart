@@ -29,77 +29,80 @@ class _FilePickerWidgetState extends State<FilePickerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ListTile(
-          title: Text(widget.componentData.label!),
-          subtitle: TextButton(
-            onPressed: () async {
-              FilePickerResult? result = (await FilePicker.platform.pickFiles(
-                type: FileType.custom,
-                allowedExtensions: widget.componentData.validation?.fileTypes,
-              ));
-
-              if (result != null) {
-                if (result.isSinglePick) {
-                  PlatformFile file = result.files.first;
-                  double size = file.size / 1024;
-                  double? maxSize = widget.componentData.validation!.maxSizeInKb?.toDouble();
-                  if (size > maxSize!) {
-                    var snackBar = SnackBar(
-                      content: Text(
-                          'Size should be less than ${widget.componentData.validation!.maxSizeInKb}KB'),
-                      duration: const Duration(seconds: 2),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  } else {
-                    widget.onFilePicked(FileModel(file: file, index: widget.index));
-                    setState(() {
-                      Logger.doLog("FILE UPLOADED....");
-                      filePicked = true;
-                      selectedFileBytes = file.bytes;
-                      selectedFileType = file.extension;
-                      pdfPath = kIsWeb ? null : file.path;
-                      Logger.doLog("FILE UPLOADED.... $pdfPath $selectedFileType");
-                    });
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          ListTile(
+            title: Text(widget.componentData.label!),
+            subtitle: TextButton(
+              onPressed: () async {
+                FilePickerResult? result = (await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: widget.componentData.validation?.fileTypes,
+                ));
+      
+                if (result != null) {
+                  if (result.isSinglePick) {
+                    PlatformFile file = result.files.first;
+                    double size = file.size / 1024;
+                    double? maxSize = widget.componentData.validation!.maxSizeInKb?.toDouble();
+                    if (size > maxSize!) {
+                      var snackBar = SnackBar(
+                        content: Text(
+                            'Size should be less than ${widget.componentData.validation!.maxSizeInKb}KB'),
+                        duration: const Duration(seconds: 2),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    } else {
+                      widget.onFilePicked(FileModel(file: file, index: widget.index));
+                      setState(() {
+                        Logger.doLog("FILE UPLOADED....");
+                        filePicked = true;
+                        selectedFileBytes = file.bytes;
+                        selectedFileType = file.extension;
+                        pdfPath = kIsWeb ? null : file.path;
+                        Logger.doLog("FILE UPLOADED.... $pdfPath $selectedFileType");
+                      });
+                    }
                   }
                 }
-              }
-            },
-            child: const Align(
-              alignment: AlignmentDirectional.bottomStart,
-              child: Text("UPLOAD FILE"),
+              },
+              child: const Align(
+                alignment: AlignmentDirectional.bottomStart,
+                child: Text("UPLOAD FILE"),
+              ),
             ),
           ),
-        ),
-        if (filePicked)
-          SizedBox(
-            height: 0.3 * SizeConfig.screenHeight,
-            width: double.infinity,
-            child: (selectedFileType == 'jpg' || selectedFileType == 'png')
-                ? kIsWeb
-                    ? Image.memory(
-                        selectedFileBytes!,
-                        alignment: Alignment.bottomLeft,
-                        fit: BoxFit.fitHeight,
-                      )
-                    : Image.file(
-                        File(pdfPath!),
-                        alignment: Alignment.bottomLeft,
-                        fit: BoxFit.fitHeight,
-                      )
-                : (selectedFileType == 'pdf')
-                    ? kIsWeb
-                        ? SfPdfViewer.memory(
-                            selectedFileBytes!,
-                          )
-                        : SfPdfViewer.file(
-                            File(pdfPath!),
-                          )
-                    : const Text("No PDF selected"),
-          ),
-        const SizedBox(height: 10)
-      ],
+          if (filePicked)
+            SizedBox(
+              height: 0.3 * SizeConfig.screenHeight,
+              width: double.infinity,
+              child: (selectedFileType == 'jpg' || selectedFileType == 'png')
+                  ? kIsWeb
+                      ? Image.memory(
+                          selectedFileBytes!,
+                          alignment: Alignment.bottomLeft,
+                          fit: BoxFit.fitHeight,
+                        )
+                      : Image.file(
+                          File(pdfPath!),
+                          alignment: Alignment.bottomLeft,
+                          fit: BoxFit.fitHeight,
+                        )
+                  : (selectedFileType == 'pdf')
+                      ? kIsWeb
+                          ? SfPdfViewer.memory(
+                              selectedFileBytes!,
+                            )
+                          : SfPdfViewer.file(
+                              File(pdfPath!),
+                            )
+                      : const Text("No PDF selected"),
+            ),
+          const SizedBox(height: 10)
+        ],
+      ),
     );
   }
 }

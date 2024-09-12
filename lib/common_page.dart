@@ -16,6 +16,7 @@ class CommonPage extends StatefulWidget {
   final String title;
   final Screen screenData;
   final List<FileModel> fileList = [];
+  final Map<String, dynamic> jsonData = {};
 
   CommonPage({
     super.key,
@@ -52,7 +53,8 @@ class _CommonPageState extends State<CommonPage> {
                 delegate: SliverChildBuilderDelegate(
                   childCount: widget.screenData.fields!.length,
                   (context, index) {
-                    return buildComponent(widget.screenData.fields![index], index);
+                    return buildComponent(
+                        widget.screenData.fields![index], index);
                   },
                 ),
               ),
@@ -77,10 +79,12 @@ class _CommonPageState extends State<CommonPage> {
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextFormField(
-            validator: (text) => validateEditText(text, componentData.validation!),
+            validator: (text) =>
+                validateEditText(text, componentData.validation!),
             decoration: InputDecoration(
-              labelText:
-                  (!componentData.required!) ? "${componentData.label} *" : componentData.label,
+              labelText: (!componentData.required!)
+                  ? "${componentData.label} *"
+                  : componentData.label,
               border: OutlineInputBorder(
                 borderRadius: 10.modifyCorners(),
                 borderSide: BorderSide(
@@ -122,6 +126,7 @@ class _CommonPageState extends State<CommonPage> {
               }
             }
             widget.fileList.add(file);
+            widget.jsonData[componentData.name!] = file.file.name;
             Logger.doLog("${widget.fileList.length}");
           },
         );
@@ -188,9 +193,16 @@ class _CommonPageState extends State<CommonPage> {
     }
   }
 
-  handleButtonPress(Button componentData) {
+  handleButtonPress(Button componentData) async {
     if (formKey.currentState!.validate()) {
       if (componentData.navigationOnSuccess != null) {
+        if (componentData.apiEndPoint != "" && componentData.method != "") {
+          if (componentData.method == "POST") {
+            ApiResult<dynamic> response1 = await LocalApiService()
+                .postApiCall(componentData.apiEndPoint!, widget.jsonData);
+            Logger.doLog("RESPONSE : ${response1.data}");
+          }
+        }
         context.push(componentData.navigationOnSuccess!);
       }
     }
@@ -211,10 +223,12 @@ class _CommonPageState extends State<CommonPage> {
     for (On pageLoad in widget.screenData.onPageLoad!) {
       switch (pageLoad.method) {
         case "GET":
-          ApiResult<dynamic> response =
-              await LocalApiService().getApiCall(pageLoad.apiEndPoint!, showLoaderDialog: true);
+          ApiResult<dynamic> response = await LocalApiService()
+              .getApiCall(pageLoad.apiEndPoint!, showLoaderDialog: true);
+
           if (response.data != null) {
-            CountryResponseModel model = countryResponseModelFromJson(response.data!);
+            CountryResponseModel model =
+                countryResponseModelFromJson(response.data!);
             List<String> countryNames = [];
             model.extraData!.forEach((country) {
               if (!country.isDeleted!) {

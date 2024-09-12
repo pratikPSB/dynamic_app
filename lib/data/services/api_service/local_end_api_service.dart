@@ -15,8 +15,9 @@ class LocalEndPoints {
 }
 
 class LocalApiService {
+  // final DioService _apiClient =      DioService(baseUrl: appConfigModel!.appConfigData!.applicationBaseUrl!);
   final DioService _apiClient =
-      DioService(baseUrl: appConfigModel!.appConfigData!.applicationBaseUrl!);
+      DioService(baseUrl: appConfigModel!.appConfigData!.mockServerUrl!);
   final ConnectivityService _connectivityService = ConnectivityService();
 
   static final LocalApiService _instance = LocalApiService._internal();
@@ -30,8 +31,8 @@ class LocalApiService {
   String getCurrentDateTimeHeader() {
     final now = DateTime.now();
     String stringModified = now.toString().replaceAll(' ', 'T');
-    stringModified =
-        stringModified.replaceRange(stringModified.indexOf("."), stringModified.length, "");
+    stringModified = stringModified.replaceRange(
+        stringModified.indexOf("."), stringModified.length, "");
     String finalString = "mobile;${stringModified}Z";
     Logger.doLog(finalString);
     String encCurrentDateTime = EncryptionUtils().encryptRSA(finalString);
@@ -51,8 +52,10 @@ class LocalApiService {
       }
       try {
         Map<String, dynamic> headers = <String, dynamic>{
-          ConstKeys.authority: appConfigModel!.appConfigData!.appointmentUrlAuthority,
-          ConstKeys.referer: appConfigModel!.appConfigData!.appointmentUrlOrigin,
+          ConstKeys.authority:
+              appConfigModel!.appConfigData!.appointmentUrlAuthority,
+          ConstKeys.referer:
+              appConfigModel!.appConfigData!.appointmentUrlOrigin,
           ConstKeys.origin: appConfigModel!.appConfigData!.appointmentUrlOrigin,
           ConstKeys.clientSource: getCurrentDateTimeHeader(),
         };
@@ -68,7 +71,8 @@ class LocalApiService {
           if (response.containsKey("error")) {
             if (response["error"] != null) {
               Error model = Error.fromJson(response["error"]);
-              return ApiResult()..setException(APIErrorHandler.apiException(model));
+              return ApiResult()
+                ..setException(APIErrorHandler.apiException(model));
             }
           }
         }
@@ -78,18 +82,21 @@ class LocalApiService {
           // hideLoader();
         }
         if (e is DioException) {
-          return ApiResult()..setException(APIErrorHandler.dioException(error: e));
+          return ApiResult()
+            ..setException(APIErrorHandler.dioException(error: e));
         } else {
           return ApiResult()..setException(APIErrorHandler.otherException());
         }
       }
     } else {
-      return ApiResult()..setException(APIErrorHandler.otherException("No Internet connection"));
+      return ApiResult()
+        ..setException(
+            APIErrorHandler.otherException("No Internet connection"));
     }
   }
 
   Future<ApiResult<dynamic>> postApiCall(String endPoint, dynamic data,
-      {bool isFormURLEncoded = true, bool showLoaderDialog = true}) async {
+      {bool isFormURLEncoded = false, bool showLoaderDialog = true}) async {
     bool isAvailable = await _connectivityService.isConnectionAvailable();
     if (isAvailable) {
       if (showLoaderDialog) {
@@ -98,7 +105,8 @@ class LocalApiService {
       try {
         Map<String, dynamic> headers = <String, dynamic>{
           ConstKeys.contentType: ConstKeys.contentTypeValue,
-          ConstKeys.referer: appConfigModel!.appConfigData!.appointmentUrlOrigin,
+          ConstKeys.referer:
+              appConfigModel!.appConfigData!.appointmentUrlOrigin,
           ConstKeys.clientSource: getCurrentDateTimeHeader(),
         };
 
@@ -115,7 +123,8 @@ class LocalApiService {
           if (response.containsKey("error")) {
             if (response["error"] != null) {
               Error model = Error.fromJson(response["error"]);
-              return ApiResult()..setException(APIErrorHandler.apiException(model));
+              return ApiResult()
+                ..setException(APIErrorHandler.apiException(model));
             }
           }
         }
@@ -125,13 +134,16 @@ class LocalApiService {
           // hideLoader();
         }
         if (e is DioException) {
-          return ApiResult()..setException(APIErrorHandler.dioException(error: e));
+          return ApiResult()
+            ..setException(APIErrorHandler.dioException(error: e));
         } else {
           return ApiResult()..setException(APIErrorHandler.otherException());
         }
       }
     } else {
-      return ApiResult()..setException(APIErrorHandler.otherException("No Internet connection"));
+      return ApiResult()
+        ..setException(
+            APIErrorHandler.otherException("No Internet connection"));
     }
   }
 }

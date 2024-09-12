@@ -4,7 +4,8 @@
 
 import 'dart:convert';
 
-AppConfigModel appConfigModelFromJson(String str) => AppConfigModel.fromJson(json.decode(str));
+AppConfigModel appConfigModelFromJson(String str) =>
+    AppConfigModel.fromJson(json.decode(str));
 
 String appConfigModelToJson(AppConfigModel data) => json.encode(data.toJson());
 
@@ -27,14 +28,18 @@ class AppConfigModel {
       );
 
   factory AppConfigModel.fromJson(Map<String, dynamic> json) => AppConfigModel(
-    appTheme: json["app_theme"] == null ? null : AppTheme.fromJson(json["app_theme"]),
-    appConfigData: json["app_config_data"] == null ? null : AppConfigData.fromJson(json["app_config_data"]),
-  );
+        appTheme: json["app_theme"] == null
+            ? null
+            : AppTheme.fromJson(json["app_theme"]),
+        appConfigData: json["app_config_data"] == null
+            ? null
+            : AppConfigData.fromJson(json["app_config_data"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "app_theme": appTheme?.toJson(),
-    "app_config_data": appConfigData?.toJson(),
-  };
+        "app_theme": appTheme?.toJson(),
+        "app_config_data": appConfigData?.toJson(),
+      };
 }
 
 class AppConfigData {
@@ -46,78 +51,82 @@ class AppConfigData {
   final String? appointmentUrl;
   final String? appointmentUrlOrigin;
   final String? appointmentUrlAuthority;
+  final String? mockServerUrl;
   final String? trackUrl;
   final String? devPublicUrl;
   final String? imageUrl;
 
-  AppConfigData({
-    this.androidAppVersion,
-    this.iosAppVersion,
-    this.forceUpdate,
-    this.applicationBaseUrl,
-    this.eTokenBaseUrl,
-    this.appointmentUrl,
-    this.appointmentUrlOrigin,
-    this.appointmentUrlAuthority,
-    this.trackUrl,
-    this.devPublicUrl,
-    this.imageUrl,
-  });
+  AppConfigData(
+      {this.androidAppVersion,
+      this.iosAppVersion,
+      this.forceUpdate,
+      this.applicationBaseUrl,
+      this.eTokenBaseUrl,
+      this.appointmentUrl,
+      this.appointmentUrlOrigin,
+      this.appointmentUrlAuthority,
+      this.trackUrl,
+      this.devPublicUrl,
+      this.imageUrl,
+      this.mockServerUrl});
 
-  AppConfigData copyWith({
-    int? androidAppVersion,
-    String? iosAppVersion,
-    bool? forceUpdate,
-    String? applicationBaseUrl,
-    String? eTokenBaseUrl,
-    String? appointmentUrl,
-    String? appointmentUrlOrigin,
-    String? appointmentUrlAuthority,
-    String? trackUrl,
-    String? devPublicUrl,
-    String? imageUrl,
-  }) =>
+  AppConfigData copyWith(
+          {int? androidAppVersion,
+          String? iosAppVersion,
+          bool? forceUpdate,
+          String? applicationBaseUrl,
+          String? eTokenBaseUrl,
+          String? appointmentUrl,
+          String? appointmentUrlOrigin,
+          String? appointmentUrlAuthority,
+          String? trackUrl,
+          String? devPublicUrl,
+          String? imageUrl,
+          String? mockServerUrl}) =>
       AppConfigData(
-        androidAppVersion: androidAppVersion ?? this.androidAppVersion,
-        iosAppVersion: iosAppVersion ?? this.iosAppVersion,
-        forceUpdate: forceUpdate ?? this.forceUpdate,
-        applicationBaseUrl: applicationBaseUrl ?? this.applicationBaseUrl,
-        eTokenBaseUrl: eTokenBaseUrl ?? this.eTokenBaseUrl,
-        appointmentUrl: appointmentUrl ?? this.appointmentUrl,
-        appointmentUrlOrigin: appointmentUrlOrigin ?? this.appointmentUrlOrigin,
-        appointmentUrlAuthority: appointmentUrlAuthority ?? this.appointmentUrlAuthority,
-        trackUrl: trackUrl ?? this.trackUrl,
-        devPublicUrl: devPublicUrl ?? this.devPublicUrl,
-        imageUrl: imageUrl ?? this.imageUrl,
-      );
+          androidAppVersion: androidAppVersion ?? this.androidAppVersion,
+          iosAppVersion: iosAppVersion ?? this.iosAppVersion,
+          forceUpdate: forceUpdate ?? this.forceUpdate,
+          applicationBaseUrl: applicationBaseUrl ?? this.applicationBaseUrl,
+          eTokenBaseUrl: eTokenBaseUrl ?? this.eTokenBaseUrl,
+          appointmentUrl: appointmentUrl ?? this.appointmentUrl,
+          appointmentUrlOrigin:
+              appointmentUrlOrigin ?? this.appointmentUrlOrigin,
+          appointmentUrlAuthority:
+              appointmentUrlAuthority ?? this.appointmentUrlAuthority,
+          trackUrl: trackUrl ?? this.trackUrl,
+          devPublicUrl: devPublicUrl ?? this.devPublicUrl,
+          imageUrl: imageUrl ?? this.imageUrl,
+          mockServerUrl: mockServerUrl ?? this.mockServerUrl);
 
   factory AppConfigData.fromJson(Map<String, dynamic> json) => AppConfigData(
-    androidAppVersion: json["android_app_version"],
-    iosAppVersion: json["ios_app_version"],
-    forceUpdate: json["force_update"],
-    applicationBaseUrl: json["application_base_url"],
-    eTokenBaseUrl: json["e_token_base_url"],
-    appointmentUrl: json["appointment_url"],
-    appointmentUrlOrigin: json["appointment_url_origin"],
-    appointmentUrlAuthority: json["appointment_url_authority"],
-    trackUrl: json["track_url"],
-    devPublicUrl: json["dev_public_URL"],
-    imageUrl: json["image_url"],
-  );
+      androidAppVersion: json["android_app_version"],
+      iosAppVersion: json["ios_app_version"],
+      forceUpdate: json["force_update"],
+      applicationBaseUrl: json["application_base_url"],
+      eTokenBaseUrl: json["e_token_base_url"],
+      appointmentUrl: json["appointment_url"],
+      appointmentUrlOrigin: json["appointment_url_origin"],
+      appointmentUrlAuthority: json["appointment_url_authority"],
+      trackUrl: json["track_url"],
+      devPublicUrl: json["dev_public_URL"],
+      imageUrl: json["image_url"],
+      mockServerUrl: json["mock_server_url"]);
 
   Map<String, dynamic> toJson() => {
-    "android_app_version": androidAppVersion,
-    "ios_app_version": iosAppVersion,
-    "force_update": forceUpdate,
-    "application_base_url": applicationBaseUrl,
-    "e_token_base_url": eTokenBaseUrl,
-    "appointment_url": appointmentUrl,
-    "appointment_url_origin": appointmentUrlOrigin,
-    "appointment_url_authority": appointmentUrlAuthority,
-    "track_url": trackUrl,
-    "dev_public_URL": devPublicUrl,
-    "image_url": imageUrl,
-  };
+        "android_app_version": androidAppVersion,
+        "ios_app_version": iosAppVersion,
+        "force_update": forceUpdate,
+        "application_base_url": applicationBaseUrl,
+        "e_token_base_url": eTokenBaseUrl,
+        "appointment_url": appointmentUrl,
+        "appointment_url_origin": appointmentUrlOrigin,
+        "appointment_url_authority": appointmentUrlAuthority,
+        "track_url": trackUrl,
+        "dev_public_URL": devPublicUrl,
+        "image_url": imageUrl,
+        "mock_server_url": mockServerUrl
+      };
 }
 
 class AppTheme {
@@ -143,16 +152,22 @@ class AppTheme {
       );
 
   factory AppTheme.fromJson(Map<String, dynamic> json) => AppTheme(
-    lightThemeColors: json["light_theme_colors"] == null ? null : ThemeColors.fromJson(json["light_theme_colors"]),
-    darkThemeColors: json["dark_theme_colors"] == null ? null : ThemeColors.fromJson(json["dark_theme_colors"]),
-    textStyle: json["text_style"] == null ? null : TextStyle.fromJson(json["text_style"]),
-  );
+        lightThemeColors: json["light_theme_colors"] == null
+            ? null
+            : ThemeColors.fromJson(json["light_theme_colors"]),
+        darkThemeColors: json["dark_theme_colors"] == null
+            ? null
+            : ThemeColors.fromJson(json["dark_theme_colors"]),
+        textStyle: json["text_style"] == null
+            ? null
+            : TextStyle.fromJson(json["text_style"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "light_theme_colors": lightThemeColors?.toJson(),
-    "dark_theme_colors": darkThemeColors?.toJson(),
-    "text_style": textStyle?.toJson(),
-  };
+        "light_theme_colors": lightThemeColors?.toJson(),
+        "dark_theme_colors": darkThemeColors?.toJson(),
+        "text_style": textStyle?.toJson(),
+      };
 }
 
 class ThemeColors {
@@ -178,16 +193,16 @@ class ThemeColors {
       );
 
   factory ThemeColors.fromJson(Map<String, dynamic> json) => ThemeColors(
-    primary: json["primary"],
-    secondary: json["secondary"],
-    tertiary: json["tertiary"],
-  );
+        primary: json["primary"],
+        secondary: json["secondary"],
+        tertiary: json["tertiary"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "primary": primary,
-    "secondary": secondary,
-    "tertiary": tertiary,
-  };
+        "primary": primary,
+        "secondary": secondary,
+        "tertiary": tertiary,
+      };
 }
 
 class TextStyle {
@@ -209,14 +224,16 @@ class TextStyle {
       );
 
   factory TextStyle.fromJson(Map<String, dynamic> json) => TextStyle(
-    font: json["font"],
-    tbBorderStyle: json["tb_border_style"] == null ? null : TbBorderStyle.fromJson(json["tb_border_style"]),
-  );
+        font: json["font"],
+        tbBorderStyle: json["tb_border_style"] == null
+            ? null
+            : TbBorderStyle.fromJson(json["tb_border_style"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "font": font,
-    "tb_border_style": tbBorderStyle?.toJson(),
-  };
+        "font": font,
+        "tb_border_style": tbBorderStyle?.toJson(),
+      };
 }
 
 class TbBorderStyle {
@@ -242,14 +259,14 @@ class TbBorderStyle {
       );
 
   factory TbBorderStyle.fromJson(Map<String, dynamic> json) => TbBorderStyle(
-    borderType: json["border_type"],
-    borderRadius: json["border_radius"],
-    borderColor: json["border_color"],
-  );
+        borderType: json["border_type"],
+        borderRadius: json["border_radius"],
+        borderColor: json["border_color"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "border_type": borderType,
-    "border_radius": borderRadius,
-    "border_color": borderColor,
-  };
+        "border_type": borderType,
+        "border_radius": borderRadius,
+        "border_color": borderColor,
+      };
 }
