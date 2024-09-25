@@ -3,9 +3,11 @@ import 'package:vfs_dynamic_app/data/model/app_modules_by_client_model.dart';
 String? validateEditText(String? value, Validations validation) {
   if (_validateMandatory(validation.mandatory, value) != null) {
     return _validateMandatory(validation.mandatory, value);
-  } else if (_validateLength(validation.maxLength, value, isForMin: false) != null) {
+  } else if (_validateLength(validation.maxLength, value, isForMin: false) !=
+      null) {
     return _validateLength(validation.maxLength, value, isForMin: false);
-  } else if (_validateLength(validation.minLength, value, isForMin: true) != null) {
+  } else if (_validateLength(validation.minLength, value, isForMin: true) !=
+      null) {
     return _validateLength(validation.minLength, value, isForMin: true);
   } else if (_validateValue(validation.regex, value) != null) {
     return _validateValue(validation.regex, value);
@@ -50,7 +52,7 @@ String? _validateMandatory(Mandatory? mandatory, String? value) {
     if (mandatory.value != null) {
       if (mandatory.value is bool) {
         if (mandatory.value) {
-          if (value == null) {
+          if (value!.isEmpty) {
             return mandatory.message!;
           } else {
             return null;
@@ -123,8 +125,8 @@ String? validatePassword(String? value, {String? message}) {
   if (value == null || value.isEmpty) {
     return message ?? 'Password is required';
   }
-  final passwordRegExp =
-      RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{1,}$');
+  final passwordRegExp = RegExp(
+      r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{1,}$');
 
   if (!passwordRegExp.hasMatch(value)) {
     return message ??
@@ -133,7 +135,8 @@ String? validatePassword(String? value, {String? message}) {
   return null; // No error
 }
 
-String? validateConfirmPassword(String? pass, String? confirmPass, {String? message}) {
+String? validateConfirmPassword(String? pass, String? confirmPass,
+    {String? message}) {
   if (confirmPass == null || confirmPass.isEmpty) {
     return message ?? 'Password is required';
   } else if (pass != confirmPass) {
@@ -153,7 +156,8 @@ String? validateLength(int length, String? value, {String? message}) {
   return null;
 }
 
-String? validateMobileNumber(int minLength, int maxLength, String? value, {String? message}) {
+String? validateMobileNumber(int minLength, int maxLength, String? value,
+    {String? message}) {
   if (value == null || value.isEmpty) {
     return message ?? 'Required';
   }

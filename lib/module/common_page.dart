@@ -1,4 +1,6 @@
 import 'package:collection/collection.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:fading_marquee_widget/fading_marquee_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vfs_dynamic_app/data/model/app_modules_by_client_model.dart';
@@ -7,13 +9,13 @@ import 'package:vfs_dynamic_app/data/model/file_model.dart';
 import 'package:vfs_dynamic_app/data/utils/date_helper.dart';
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
 import 'package:vfs_dynamic_app/data/utils/logger.dart';
-import 'package:vfs_dynamic_app/data/utils/size_config.dart';
 import 'package:vfs_dynamic_app/data/utils/validations.dart';
 import 'package:vfs_dynamic_app/main.dart';
 
 import '../data/model/text_controller_model.dart';
 import '../data/services/api_service/api_result.dart';
 import '../data/services/api_service/local_end_api_service.dart';
+import '../data/utils/size_config.dart';
 
 class CommonPage extends StatefulWidget {
   final String title;
@@ -56,7 +58,10 @@ class _CommonPageState extends State<CommonPage> {
     textControllerList.clear();
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: FadingMarqueeWidget(
+          pause: const Duration(milliseconds: 0),
+          child: Text(widget.title),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(9.0),
@@ -86,7 +91,8 @@ class _CommonPageState extends State<CommonPage> {
         fieldType.fieldType == "datepicker") {
       if (fieldType.fieldType == "searchable-dropdown") {
         if (fieldType.defaultValueOptionSet!.isEmpty) {
-          fieldType.defaultValueOptionSet?.add("Loading ${fieldType.logicalName}");
+          fieldType.defaultValueOptionSet
+              ?.add("Loading ${fieldType.logicalName}");
         }
         textControllerList.add(
           TextControllerModel(
@@ -121,13 +127,15 @@ class _CommonPageState extends State<CommonPage> {
         (index, field) {
           buildTextControllerList(parentIndex, index);
           return Expanded(
-              child: buildComponent(field, parentIndex, index, componentData.mandatory));
+              child: buildComponent(
+                  field, parentIndex, index, componentData.mandatory));
         },
       ).toList(),
     );
   }
 
-  Widget buildComponent(FieldElement componentData, int parentIndex, int index, bool? mandatory) {
+  Widget buildComponent(
+      FieldElement componentData, int parentIndex, int index, bool? mandatory) {
     switch (componentData.fieldType) {
       case "textbox":
       case "datepicker":
@@ -135,17 +143,18 @@ class _CommonPageState extends State<CommonPage> {
           padding: const EdgeInsets.all(8.0),
           child: TextFormField(
             controller: textControllerList
-                .lastWhere(
-                    (element) => (element.index == index && element.parentIndex == parentIndex))
+                .lastWhere((element) => (element.index == index &&
+                    element.parentIndex == parentIndex))
                 .controller,
             readOnly: componentData.fieldType == "datepicker",
             onTap: (componentData.fieldType == "datepicker")
                 ? () async {
                     performHapticFeedback();
-                    DateTime? pickedDate = await DateHelper.commonPickedDate(context);
+                    DateTime? pickedDate =
+                        await DateHelper.commonPickedDate(context);
                     textControllerList
-                        .lastWhere((element) =>
-                            (element.index == index && element.parentIndex == parentIndex))
+                        .lastWhere((element) => (element.index == index &&
+                            element.parentIndex == parentIndex))
                         .controller
                         .text = DateHelper.convertDateString(
                       pickedDate.toString(),
@@ -182,8 +191,13 @@ class _CommonPageState extends State<CommonPage> {
       case 'searchable-dropdown':
         return Padding(
           padding: const EdgeInsets.all(8.0),
-          child: DropdownButtonFormField<String>(
-            menuMaxHeight: SizeConfig.screenHeight * 0.33,
+          child: DropdownButtonFormField2<String>(
+            dropdownStyleData: DropdownStyleData(
+              useSafeArea: true,
+              maxHeight: 0.3 * SizeConfig.screenHeight,
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(10.0)),
+            ),
             value: componentData.defaultValueOptionSet![0],
             items: (componentData.defaultValueOptionSet!)
                 .map((value) => DropdownMenuItem<String>(
@@ -192,8 +206,10 @@ class _CommonPageState extends State<CommonPage> {
                     ))
                 .toList(),
             onChanged: (value) {
-              textControllerList.lastWhere((element) => (element.index == index)).controller.text =
-                  value!;
+              textControllerList
+                  .lastWhere((element) => (element.index == index))
+                  .controller
+                  .text = value!;
             },
           ),
         );
@@ -212,9 +228,12 @@ class _CommonPageState extends State<CommonPage> {
           performHapticFeedback();
           handleButtonPress(componentData);
         },
-        child: Text(
-          // todo: change here from logicalName to displayName
-          componentData.logicalName!,
+        child: FadingMarqueeWidget(
+          pause: const Duration(milliseconds: 0),
+          child: Text(
+            // todo: change here from logicalName to displayName
+            componentData.logicalName!,
+          ),
         ),
       ),
     );
@@ -249,7 +268,8 @@ class _CommonPageState extends State<CommonPage> {
               field.fieldType == "datepicker") {
             for (var element in textControllerList) {
               if (element.elementName == field.logicalName!) {
-                Logger.doLog("${field.logicalName!} : ${element.controller.text}");
+                Logger.doLog(
+                    "${field.logicalName!} : ${element.controller.text}");
                 jsonData[field.logicalName!] = element.controller.text;
               }
             }
@@ -269,7 +289,8 @@ class _CommonPageState extends State<CommonPage> {
             showLoaderDialog: true,
           );
           if (response.data != null) {
-            CountryResponseModel model = countryResponseModelFromJson(response.data!);
+            CountryResponseModel model =
+                countryResponseModelFromJson(response.data!);
             List<String> countryNames = [];
             for (var country in model.extraData!) {
               if (!country.isDeleted!) {
