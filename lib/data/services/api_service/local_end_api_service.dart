@@ -14,15 +14,15 @@ class LocalEndPoints {
   static const String getCountryList = "Country/MobileCountryList";
 }
 
-class LocalApiService {
+class ApiService {
   // final DioService _apiClient = DioService(baseUrl: appConfigModel!.appConfigData!.applicationBaseUrl!);
   DioService apiClient;
   final ConnectivityService _connectivityService = ConnectivityService();
 
-  LocalApiService({required this.apiClient});
+  ApiService({required this.apiClient});
 
-  factory LocalApiService.getApiService(DioService apiClient) {
-    return LocalApiService(apiClient: apiClient);
+  factory ApiService.getApiService(DioService apiClient) {
+    return ApiService(apiClient: apiClient);
   }
 
   String getCurrentDateTimeHeader() {

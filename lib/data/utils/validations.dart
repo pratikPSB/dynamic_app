@@ -1,15 +1,103 @@
-import 'package:vfs_dynamic_app/data/model/app_screens_model.dart';
+import 'package:vfs_dynamic_app/data/model/app_modules_by_client_model.dart';
 
-String? validateEditText(String? value, Validation validation) {
-  switch (validation.type) {
-    case "email":
-      return validateEmail(value, message: validation.errorMessage);
-    case "mobile":
-      return validateMobileNumber(7, 13, value, message: validation.errorMessage);
-    case "password":
-      return validatePassword(value, message: validation.errorMessage);
-    default:
-      return validateName(value, message: validation.errorMessage);
+String? validateEditText(String? value, Validations validation) {
+  if (_validateMandatory(validation.mandatory, value) != null) {
+    return _validateMandatory(validation.mandatory, value);
+  } else if (_validateLength(validation.maxLength, value, isForMin: false) != null) {
+    return _validateLength(validation.maxLength, value, isForMin: false);
+  } else if (_validateLength(validation.minLength, value, isForMin: true) != null) {
+    return _validateLength(validation.minLength, value, isForMin: true);
+  } else if (_validateValue(validation.regex, value) != null) {
+    return _validateValue(validation.regex, value);
+  } else if (_validateValue(validation.maxValue, value) != null) {
+    return _validateValue(validation.maxValue, value);
+  } else if (_validateValue(validation.minValue, value) != null) {
+    return _validateValue(validation.minValue, value);
+  } else if (validateDateTime(validation.validateDateTime, value) != null) {
+    return validateDateTime(validation.validateDateTime, value);
+  } else {
+    return null;
+  }
+}
+
+String? validateDateTime(ValidateDateTime? validateDateTime, String? value) {
+  return null;
+}
+
+String? _validateValue(MaxValue? regex, String? value) {
+  if (regex != null) {
+    if (regex.value != null) {
+      try {
+        final regExp = RegExp(regex.value!);
+        if (!regExp.hasMatch(value!)) {
+          return regex.message!;
+        } else {
+          return null;
+        }
+      } catch (e) {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+}
+
+String? _validateMandatory(Mandatory? mandatory, String? value) {
+  if (mandatory != null) {
+    if (mandatory.value != null) {
+      if (mandatory.value is bool) {
+        if (mandatory.value) {
+          if (value == null) {
+            return mandatory.message!;
+          } else {
+            return null;
+          }
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+}
+
+String? _validateLength(Length? regex, String? value, {bool? isForMin}) {
+  if (regex != null) {
+    if (regex.value != null) {
+      if (int.tryParse(regex.value!) != null) {
+        if (isForMin != null) {
+          if (isForMin) {
+            if (value!.length < int.parse(regex.value!)) {
+              return regex.message!;
+            } else {
+              return null;
+            }
+          } else {
+            if (value!.length > int.parse(regex.value!)) {
+              return regex.message!;
+            } else {
+              return null;
+            }
+          }
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  } else {
+    return null;
   }
 }
 
@@ -39,7 +127,8 @@ String? validatePassword(String? value, {String? message}) {
       RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{1,}$');
 
   if (!passwordRegExp.hasMatch(value)) {
-    return message ?? 'Password must contain at least one uppercase letter,\none lowercase letter, one number, and one \nspecial character';
+    return message ??
+        'Password must contain at least one uppercase letter,\none lowercase letter, one number, and one \nspecial character';
   }
   return null; // No error
 }

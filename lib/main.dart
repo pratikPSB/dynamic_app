@@ -3,13 +3,14 @@ import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:vfs_dynamic_app/common_page.dart';
 import 'package:vfs_dynamic_app/data/model/app_config_model.dart' hide TextStyle;
-import 'package:vfs_dynamic_app/data/model/app_screens_model.dart';
+import 'package:vfs_dynamic_app/data/model/app_modules_by_client_model.dart';
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
 import 'package:vfs_dynamic_app/data/utils/logger.dart';
 import 'package:vfs_dynamic_app/data/utils/prefs_utils.dart';
-import 'package:vfs_dynamic_app/unknown_page.dart';
+import 'package:vfs_dynamic_app/module/common_page.dart';
+import 'package:vfs_dynamic_app/module/dashboard_page.dart';
+import 'package:vfs_dynamic_app/module/unknown_page.dart';
 
 import 'data/constants/const_functions.dart';
 import 'data/services/api_service/api_client.dart';
@@ -20,7 +21,7 @@ import 'data/utils/theme_utils.dart';
 import 'firebase_options.dart';
 
 AppConfigModel? appConfigModel;
-AppScreensModel? appScreensModel;
+AppModuleByClientModel? appScreensModel;
 late DioService liveServerService;
 late DioService mockServerService;
 
@@ -51,8 +52,8 @@ class MyApp extends StatelessWidget {
     mockServerService = DioService(baseUrl: appConfigModel!.appConfigData!.mockServerUrl!);
 
     String appConfigNewString =
-        FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appScreens);
-    appScreensModel = appConfigNewModelFromJson(appConfigNewString);
+        FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appModulesByClient);
+    appScreensModel = appModuleByClientModelFromJson(appConfigNewString);
 
     ColorScheme lightColorScheme = SeedColorScheme.fromSeeds(
       brightness: Brightness.light,
@@ -81,7 +82,7 @@ class MyApp extends StatelessWidget {
       color: Colors.white,
     );
 
-    final router = createGoRouter(appScreensModel!.screens!);
+    final router = createGoRouter(appScreensModel!.modules!);
 
     return ValueListenableBuilder(
       valueListenable: ThemeUtils.notifier,
@@ -112,29 +113,31 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  GoRouter createGoRouter(List<Screen> screensList) {
-    Screen? initialScreen;
-    for (Screen screen in screensList) {
-      if (screen.isInitialRoute == true) {
-        initialScreen = screen;
-        break;
-      }
-    }
-    return GoRouter(
-      initialLocation: (initialScreen != null) ? initialScreen.route : screensList[0].route,
-      // Set the initial route dynamically if needed
-      routes: screensList.map<GoRoute>((screenData) {
-        String routeName = screenData.route!;
-        Logger.doLog(routeName);
-        return GoRoute(
-          path: routeName,
-          builder: (context, state) => CommonPage(
-            title: screenData.title!,
-            screenData: screenData,
-          ),
-        );
-      }).toList(),
+  GoRouter createGoRouter(List<Module> screensList) {
+    screensList.sort(
+      (a, b) => a.displayPosition!.compareTo(b.displayPosition!),
+    );
+    var routesList = <GoRoute>[];
+    routesList.add(GoRoute(
+      path: "/dashboard",
+      builder: (context, state) => DashboardPage(moduleList:screensList),
+    ));
+    routesList.addAll(screensList.map<GoRoute>((screenData) {
+      String routeName = "/${screenData.routeUrl!}";
+      Logger.doLog(routeName);
+      return GoRoute(
+        path: routeName,
+        builder: (context, state) => CommonPage(
+          title: screenData.displayName!,
+          screenData: screenData,
+        ),
+      );
+    }).toList());
 
+    return GoRouter(
+      initialLocation: "/dashboard",
+      // Set the initial route dynamically if needed
+      routes: routesList,
       // Handling unknown routes
       errorPageBuilder: (context, state) => const MaterialPage<void>(
         child: UnknownPage(),

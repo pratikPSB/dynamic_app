@@ -6,6 +6,7 @@ import '../../utils/logger.dart';
 class FirebaseRemoteConfigKeys {
   static const String appConfig = 'app_config';
   static const String appScreens = 'app_screens';
+  static const String appModulesByClient = 'app_modules_by_client';
 }
 
 class FirebaseRemoteConfigService {
