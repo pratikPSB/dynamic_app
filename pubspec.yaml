@@ -55,7 +55,7 @@ dependencies:
   fading_marquee_widget: ^1.0.2
 
   # drop down
-  dropdown_button2: ^2.3.9
+  dropdown_search: ^6.0.1
 
 dev_dependencies:
   flutter_test:

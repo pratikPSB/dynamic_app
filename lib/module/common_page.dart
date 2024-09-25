@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:fading_marquee_widget/fading_marquee_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +15,6 @@ import 'package:vfs_dynamic_app/main.dart';
 import '../data/model/text_controller_model.dart';
 import '../data/services/api_service/api_result.dart';
 import '../data/services/api_service/local_end_api_service.dart';
-import '../data/utils/size_config.dart';
 
 class CommonPage extends StatefulWidget {
   final String title;
@@ -191,26 +190,37 @@ class _CommonPageState extends State<CommonPage> {
       case 'searchable-dropdown':
         return Padding(
           padding: const EdgeInsets.all(8.0),
-          child: DropdownButtonFormField2<String>(
-            dropdownStyleData: DropdownStyleData(
-              useSafeArea: true,
-              maxHeight: 0.3 * SizeConfig.screenHeight,
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(10.0)),
+          child: DropdownSearch<dynamic>(
+            decoratorProps: DropDownDecoratorProps(
+              decoration: InputDecoration(
+                border: context.getTheme().inputDecorationTheme.border!,
+              ),
             ),
-            value: componentData.defaultValueOptionSet![0],
-            items: (componentData.defaultValueOptionSet!)
-                .map((value) => DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    ))
-                .toList(),
+            clickProps: ClickProps(borderRadius: BorderRadius.circular(15)),
+            selectedItem: componentData.defaultValueOptionSet![0],
+            compareFn: (item1, item2) {
+              return item1 == item2;
+            },
+            items: (filter, loadProps) {
+              return componentData.defaultValueOptionSet!;
+            },
             onChanged: (value) {
               textControllerList
                   .lastWhere((element) => (element.index == index))
                   .controller
                   .text = value!;
             },
+            popupProps: PopupProps.menu(
+              fit: FlexFit.loose,
+              showSearchBox: true,
+              searchFieldProps: TextFieldProps(
+                  decoration: InputDecoration(
+                border: context.getTheme().inputDecorationTheme.border!,
+              )),
+              menuProps: MenuProps(
+                borderRadius: 15.modifyCorners(),
+              ),
+            ),
           ),
         );
       case "button":

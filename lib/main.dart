@@ -3,7 +3,8 @@ import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:vfs_dynamic_app/data/model/app_config_model.dart' hide TextStyle;
+import 'package:vfs_dynamic_app/data/model/app_config_model.dart'
+    hide TextStyle;
 import 'package:vfs_dynamic_app/data/model/app_modules_by_client_model.dart';
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
 import 'package:vfs_dynamic_app/data/utils/logger.dart';
@@ -34,55 +35,77 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
+  late ColorScheme lightColorScheme;
+  late ColorScheme darkColorScheme;
+  late TextStyle styleLight;
+  late TextStyle styleDark;
+  late GoRouter router;
+
+  @override
+  void initState() {
+    String appConfigString = FirebaseRemoteConfigService()
+        .getString(FirebaseRemoteConfigKeys.appConfig);
+    appConfigModel = appConfigModelFromJson(appConfigString);
+
+    liveServerService =
+        DioService(baseUrl: appConfigModel!.appConfigData!.applicationBaseUrl!);
+    mockServerService =
+        DioService(baseUrl: appConfigModel!.appConfigData!.mockServerUrl!);
+
+    String appConfigNewString = FirebaseRemoteConfigService()
+        .getString(FirebaseRemoteConfigKeys.appModulesByClient);
+    appScreensModel = appModuleByClientModelFromJson(appConfigNewString);
+
+    lightColorScheme = SeedColorScheme.fromSeeds(
+      brightness: Brightness.light,
+      primaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.primary!
+          .getColorHexFromStr()),
+      secondaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.secondary!
+          .getColorHexFromStr()),
+      tertiaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.tertiary!
+          .getColorHexFromStr()),
+      tones: FlexTones.vivid(Brightness.light),
+    );
+
+    darkColorScheme = SeedColorScheme.fromSeeds(
+      brightness: Brightness.dark,
+      primaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.primary!
+          .getColorHexFromStr()),
+      secondaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.secondary!
+          .getColorHexFromStr()),
+      tertiaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.tertiary!
+          .getColorHexFromStr()),
+      tones: FlexTones.vivid(Brightness.dark),
+    );
+
+    styleLight = GoogleFonts.getFont(appConfigModel!.appTheme!.textStyle!.font!)
+        .copyWith(
+      color: Colors.black,
+    );
+
+    styleDark = GoogleFonts.getFont(appConfigModel!.appTheme!.textStyle!.font!)
+        .copyWith(
+      color: Colors.white,
+    );
+
+    router = createGoRouter(appScreensModel!.modules!);
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeUtils.notifier.value = ThemeUtils.getThemeMode();
     ThemeUtils.changeTheme(false);
     ConstFunctions.enableHapticFeedback();
-
-    String appConfigString =
-        FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appConfig);
-    appConfigModel = appConfigModelFromJson(appConfigString);
-
-    liveServerService = DioService(baseUrl: appConfigModel!.appConfigData!.applicationBaseUrl!);
-    mockServerService = DioService(baseUrl: appConfigModel!.appConfigData!.mockServerUrl!);
-
-    String appConfigNewString =
-        FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appModulesByClient);
-    appScreensModel = appModuleByClientModelFromJson(appConfigNewString);
-
-    ColorScheme lightColorScheme = SeedColorScheme.fromSeeds(
-      brightness: Brightness.light,
-      primaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.primary!.getColorHexFromStr()),
-      secondaryKey:
-          Color(appConfigModel!.appTheme!.lightThemeColors!.secondary!.getColorHexFromStr()),
-      tertiaryKey:
-          Color(appConfigModel!.appTheme!.lightThemeColors!.tertiary!.getColorHexFromStr()),
-      tones: FlexTones.vivid(Brightness.light),
-    );
-
-    ColorScheme darkColorScheme = SeedColorScheme.fromSeeds(
-      brightness: Brightness.dark,
-      primaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.primary!.getColorHexFromStr()),
-      secondaryKey:
-          Color(appConfigModel!.appTheme!.darkThemeColors!.secondary!.getColorHexFromStr()),
-      tertiaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.tertiary!.getColorHexFromStr()),
-      tones: FlexTones.vivid(Brightness.dark),
-    );
-
-    TextStyle styleLight = GoogleFonts.getFont(appConfigModel!.appTheme!.textStyle!.font!).copyWith(
-      color: Colors.black,
-    );
-
-    TextStyle styleDark = GoogleFonts.getFont(appConfigModel!.appTheme!.textStyle!.font!).copyWith(
-      color: Colors.white,
-    );
-
-    final router = createGoRouter(appScreensModel!.modules!);
 
     return ValueListenableBuilder(
       valueListenable: ThemeUtils.notifier,
@@ -120,16 +143,24 @@ class MyApp extends StatelessWidget {
     var routesList = <GoRoute>[];
     routesList.add(GoRoute(
       path: "/dashboard",
-      builder: (context, state) => DashboardPage(moduleList:screensList),
+      builder: (context, state) => DashboardPage(moduleList: screensList),
     ));
+
     routesList.addAll(screensList.map<GoRoute>((screenData) {
       String routeName = "/${screenData.routeUrl!}";
       Logger.doLog(routeName);
       return GoRoute(
         path: routeName,
-        builder: (context, state) => CommonPage(
-          title: screenData.displayName!,
-          screenData: screenData,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: CommonPage(
+            title: screenData.displayName!,
+            screenData: screenData,
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(
+            opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
+            child: child,
+          ),
         ),
       );
     }).toList());
