@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DateHelper {
-  //Date Formator
+  //Date Formater
   static const dfyyyymmdd = "yyyy-MM-dd";
   static const dfddmmmyyyy = "dd-MMM-yyyy";
   static const dfddmmyyyy = "dd/MM/yyyy";
@@ -35,18 +35,18 @@ class DateHelper {
     return now.year;
   }
 
-  static DateTime convertStringDate(String strCurrentFormate, String strDate) {
-    return DateFormat(strCurrentFormate).parse(strDate);
+  static DateTime convertStringDate(String strCurrentFormat, String strDate) {
+    return DateFormat(strCurrentFormat).parse(strDate);
   }
 
-  static String convertDateString(
-      String strDate, String strCurrentFormate, String strExpectedFormate) {
+  static String convertDateString(String strDate, String strCurrentFormat,
+      String strExpectedFormat) {
     if (strDate.isEmpty || strDate == "0.00") {
       return strDate;
     } else {
-      DateTime parseDate = DateFormat(strCurrentFormate).parse(strDate);
+      DateTime parseDate = DateFormat(strCurrentFormat).parse(strDate);
       var inputDate = DateTime.parse(parseDate.toString());
-      var outputFormat = DateFormat(strExpectedFormate);
+      var outputFormat = DateFormat(strExpectedFormat);
       var outputDate = outputFormat.format(inputDate);
 
       return outputDate;

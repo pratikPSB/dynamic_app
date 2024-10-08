@@ -66,7 +66,8 @@ class DioService {
       data: data,
       options: requestOptions,
     );
-    return checkResponseType(response.data);
+    return response.data;
+    // return checkResponseType(response.data);
   }
 
   String checkResponseType(data) {

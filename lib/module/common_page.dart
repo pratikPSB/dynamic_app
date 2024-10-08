@@ -2,10 +2,12 @@ import 'package:collection/collection.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:fading_marquee_widget/fading_marquee_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vfs_dynamic_app/data/model/app_modules_by_client_model.dart';
 import 'package:vfs_dynamic_app/data/model/country_response_model.dart';
 import 'package:vfs_dynamic_app/data/model/file_model.dart';
+import 'package:vfs_dynamic_app/data/model/gender_res_model.dart';
 import 'package:vfs_dynamic_app/data/utils/date_helper.dart';
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
 import 'package:vfs_dynamic_app/data/utils/logger.dart';
@@ -40,7 +42,16 @@ class _CommonPageState extends State<CommonPage> {
   @override
   void initState() {
     super.initState();
-    // callInitialAPIs();
+    callInitialAPIs();
+    widget.screenData.controls?.forEachIndexed((parentIndex, row) {
+      widget.screenData.controls![parentIndex].fields!.forEachIndexed(
+        (index, element) {
+          if (element.optionsListApi != null) {
+            callFieldAPI(element.optionsListApi!, element.defaultValueOptionSet);
+          }
+        },
+      );
+    });
   }
 
   @override
@@ -90,8 +101,7 @@ class _CommonPageState extends State<CommonPage> {
         fieldType.fieldType == "datepicker") {
       if (fieldType.fieldType == "searchable-dropdown") {
         if (fieldType.defaultValueOptionSet!.isEmpty) {
-          fieldType.defaultValueOptionSet
-              ?.add("Loading ${fieldType.logicalName}");
+          fieldType.defaultValueOptionSet?.add("Loading ${fieldType.displayName}");
         }
         textControllerList.add(
           TextControllerModel(
@@ -126,15 +136,13 @@ class _CommonPageState extends State<CommonPage> {
         (index, field) {
           buildTextControllerList(parentIndex, index);
           return Expanded(
-              child: buildComponent(
-                  field, parentIndex, index, componentData.mandatory));
+              child: buildComponent(field, parentIndex, index, componentData.mandatory));
         },
       ).toList(),
     );
   }
 
-  Widget buildComponent(
-      FieldElement componentData, int parentIndex, int index, bool? mandatory) {
+  Widget buildComponent(FieldElement componentData, int parentIndex, int index, bool? mandatory) {
     switch (componentData.fieldType) {
       case "textbox":
       case "datepicker":
@@ -142,18 +150,17 @@ class _CommonPageState extends State<CommonPage> {
           padding: const EdgeInsets.all(8.0),
           child: TextFormField(
             controller: textControllerList
-                .lastWhere((element) => (element.index == index &&
-                    element.parentIndex == parentIndex))
+                .lastWhere(
+                    (element) => (element.index == index && element.parentIndex == parentIndex))
                 .controller,
             readOnly: componentData.fieldType == "datepicker",
             onTap: (componentData.fieldType == "datepicker")
                 ? () async {
                     performHapticFeedback();
-                    DateTime? pickedDate =
-                        await DateHelper.commonPickedDate(context);
+                    DateTime? pickedDate = await DateHelper.commonPickedDate(context);
                     textControllerList
-                        .lastWhere((element) => (element.index == index &&
-                            element.parentIndex == parentIndex))
+                        .lastWhere((element) =>
+                            (element.index == index && element.parentIndex == parentIndex))
                         .controller
                         .text = DateHelper.convertDateString(
                       pickedDate.toString(),
@@ -168,20 +175,18 @@ class _CommonPageState extends State<CommonPage> {
                     : validateEditText(text, componentData.validations!)
                 : null,
             decoration: InputDecoration(
-              // todo: change here from logicalName to displayName
               labelText: (mandatory != null)
                   ? (mandatory)
-                      ? "${componentData.logicalName} *"
-                      : componentData.logicalName
-                  : componentData.logicalName,
+                      ? "${componentData.displayName} *"
+                      : componentData.displayName
+                  : componentData.displayName,
               border: OutlineInputBorder(
                 borderRadius: 10.modifyCorners(),
                 borderSide: BorderSide(
                   color: context.getTheme().primaryColor,
                 ),
               ),
-              // todo: change here from logicalName to displayName
-              hintText: componentData.logicalName,
+              hintText: componentData.displayName,
             ),
             keyboardType: TextInputType.text,
             textInputAction: TextInputAction.next,
@@ -205,10 +210,8 @@ class _CommonPageState extends State<CommonPage> {
               return componentData.defaultValueOptionSet!;
             },
             onChanged: (value) {
-              textControllerList
-                  .lastWhere((element) => (element.index == index))
-                  .controller
-                  .text = value!;
+              textControllerList.lastWhere((element) => (element.index == index)).controller.text =
+                  value!;
             },
             popupProps: PopupProps.menu(
               fit: FlexFit.loose,
@@ -241,8 +244,7 @@ class _CommonPageState extends State<CommonPage> {
         child: FadingMarqueeWidget(
           pause: const Duration(milliseconds: 0),
           child: Text(
-            // todo: change here from logicalName to displayName
-            componentData.logicalName!,
+            componentData.displayName!,
           ),
         ),
       ),
@@ -253,18 +255,19 @@ class _CommonPageState extends State<CommonPage> {
     if (formKey.currentState!.validate()) {
       if (componentData.validations != null) {
         fillJsonData();
-        context.pop();
-        // if (componentData.apiEndPoint != "" && componentData.apiEndPoint != "") {
-        //   if (componentData.method == "POST") {
-        //     fillJsonData();
-        //     if (jsonData.isNotEmpty) {
-        //       ApiResult<dynamic> response1 = await ApiService.getApiService(mockServerService)
-        //           .postApiCall(componentData.apiEndPoint!, jsonData);
-        //       Logger.doLog("RESPONSE : ${response1.data}");
-        //     }
-        //   }
-        // }
         // context.pop();
+        if (componentData.onClickEvent != null) {
+          for (var element in componentData.onClickEvent!) {
+            fillJsonData();
+            if (jsonData.isNotEmpty) {
+              ApiResult<dynamic> response1 = await ApiService.getApiService(mockServerService)
+                  .postApiCall(element.url!, jsonData);
+              Fluttertoast.showToast(msg: response1.data, toastLength: Toast.LENGTH_LONG);
+              Logger.doLog("RESPONSE : ${response1.data}");
+            }
+          }
+        }
+        context.pop();
       }
     }
   }
@@ -278,8 +281,7 @@ class _CommonPageState extends State<CommonPage> {
               field.fieldType == "datepicker") {
             for (var element in textControllerList) {
               if (element.elementName == field.logicalName!) {
-                Logger.doLog(
-                    "${field.logicalName!} : ${element.controller.text}");
+                Logger.doLog("${field.logicalName!} : ${element.controller.text}");
                 jsonData[field.logicalName!] = element.controller.text;
               }
             }
@@ -299,29 +301,62 @@ class _CommonPageState extends State<CommonPage> {
             showLoaderDialog: true,
           );
           if (response.data != null) {
-            CountryResponseModel model =
-                countryResponseModelFromJson(response.data!);
+            CountryResponseModel model = countryResponseModelFromJson(response.data!);
             List<String> countryNames = [];
             for (var country in model.extraData!) {
               if (!country.isDeleted!) {
                 countryNames.add(country.countryName!);
               }
             }
-            /*for (Field field in widget.screenData.fields!) {
-              if (field.name == pageLoad.targetField) {
-                switch (field.type) {
-                  case "drop_down":
-                    setState(() {
-                      field.options = countryNames;
-                    });
-                    break;
-                }
-                break;
-              }
-            }*/
+            // for (Control control in widget.screenData.controls!) {
+            //   for(FieldElement field in control.fields!) {
+            //     if (field.logicalName == pageLoad.targetField) {
+            //       switch (field.logicalName) {
+            //         case "searchable-dropdown":
+            //           setState(() {
+            //             field.defaultValueOptionSet = countryNames;
+            //           });
+            //           break;
+            //       }
+            //       break;
+            //     }
+            //   }
+            // }
           } else if (response.getException != null) {
             Logger.doLog("CountrySelectionController : initState");
           }
+      }
+    }
+  }
+
+  callFieldAPI(OptionsListApi options, List<dynamic>? defaultValueOptionSet) {
+    if (options.backoffice != null) {
+      callBackOfficeApi(options.backoffice!, defaultValueOptionSet);
+    } else if (options.online != null) {
+      callBackOfficeApi(options.online!, defaultValueOptionSet);
+    }
+  }
+
+  Future<void> callBackOfficeApi(
+      Backoffice backoffice, List<dynamic>? defaultValueOptionSet) async {
+    if (backoffice.type == "GET") {
+      ApiResult<dynamic> response = await ApiService.getApiService(mockServerService).getApiCall(
+        backoffice.url!,
+        showLoaderDialog: true,
+      );
+      if (response.data != null) {
+        GenderResModel model = genderResModelFromJson(response.data);
+        var tempList = List<String>.empty(growable: true);
+        for (var element in model.data!) {
+          if (!defaultValueOptionSet!.contains(element.name)) {
+            tempList.add(element.name!);
+          }
+        }
+        if (tempList.isNotEmpty) {
+          setState(() {
+            defaultValueOptionSet!.addAll(tempList);
+          });
+        }
       }
     }
   }

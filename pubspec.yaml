@@ -57,6 +57,9 @@ dependencies:
   # drop down
   dropdown_search: ^6.0.1
 
+  #  flutter toast
+  fluttertoast: ^8.2.8
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
