@@ -1,4 +1,4 @@
-# vfs_dynamic_app
+# dynamic_app
 
 A new Flutter project.
 
