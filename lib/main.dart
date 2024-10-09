@@ -3,8 +3,7 @@ import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:vfs_dynamic_app/data/model/app_config_model.dart'
-    hide TextStyle;
+import 'package:vfs_dynamic_app/data/model/app_config_model.dart' hide TextStyle;
 import 'package:vfs_dynamic_app/data/model/app_modules_by_client_model.dart';
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
 import 'package:vfs_dynamic_app/data/utils/logger.dart';
@@ -25,6 +24,7 @@ AppConfigModel? appConfigModel;
 AppModuleByClientModel? appScreensModel;
 late DioService liveServerService;
 late DioService mockServerService;
+List<Module> screensList = List.empty(growable: true);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,48 +51,41 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
-    String appConfigString = FirebaseRemoteConfigService()
-        .getString(FirebaseRemoteConfigKeys.appConfig);
+    String appConfigString =
+        FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appConfig);
     appConfigModel = appConfigModelFromJson(appConfigString);
 
-    liveServerService =
-        DioService(baseUrl: appConfigModel!.appConfigData!.applicationBaseUrl!);
-    mockServerService =
-        DioService(baseUrl: appConfigModel!.appConfigData!.mockServerUrl!);
+    liveServerService = DioService(baseUrl: appConfigModel!.appConfigData!.applicationBaseUrl!);
+    mockServerService = DioService(baseUrl: appConfigModel!.appConfigData!.mockServerUrl!);
 
-    String appConfigNewString = FirebaseRemoteConfigService()
-        .getString(FirebaseRemoteConfigKeys.appModulesByClient);
+    String appConfigNewString =
+        FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appModulesByClient);
     appScreensModel = appModuleByClientModelFromJson(appConfigNewString);
 
     lightColorScheme = SeedColorScheme.fromSeeds(
       brightness: Brightness.light,
-      primaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.primary!
-          .getColorHexFromStr()),
-      secondaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.secondary!
-          .getColorHexFromStr()),
-      tertiaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.tertiary!
-          .getColorHexFromStr()),
+      primaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.primary!.getColorHexFromStr()),
+      secondaryKey:
+          Color(appConfigModel!.appTheme!.lightThemeColors!.secondary!.getColorHexFromStr()),
+      tertiaryKey:
+          Color(appConfigModel!.appTheme!.lightThemeColors!.tertiary!.getColorHexFromStr()),
       tones: FlexTones.vivid(Brightness.light),
     );
 
     darkColorScheme = SeedColorScheme.fromSeeds(
       brightness: Brightness.dark,
-      primaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.primary!
-          .getColorHexFromStr()),
-      secondaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.secondary!
-          .getColorHexFromStr()),
-      tertiaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.tertiary!
-          .getColorHexFromStr()),
+      primaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.primary!.getColorHexFromStr()),
+      secondaryKey:
+          Color(appConfigModel!.appTheme!.darkThemeColors!.secondary!.getColorHexFromStr()),
+      tertiaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.tertiary!.getColorHexFromStr()),
       tones: FlexTones.vivid(Brightness.dark),
     );
 
-    styleLight = GoogleFonts.getFont(appConfigModel!.appTheme!.textStyle!.font!)
-        .copyWith(
+    styleLight = GoogleFonts.getFont(appConfigModel!.appTheme!.textStyle!.font!).copyWith(
       color: Colors.black,
     );
 
-    styleDark = GoogleFonts.getFont(appConfigModel!.appTheme!.textStyle!.font!)
-        .copyWith(
+    styleDark = GoogleFonts.getFont(appConfigModel!.appTheme!.textStyle!.font!).copyWith(
       color: Colors.white,
     );
 
@@ -104,7 +97,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     ThemeUtils.notifier.value = ThemeUtils.getThemeMode();
-    ThemeUtils.changeTheme(false);
+    ThemeUtils.changeTheme(true);
     ConstFunctions.enableHapticFeedback();
 
     return ValueListenableBuilder(
@@ -136,10 +129,11 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
     );
   }
 
-  GoRouter createGoRouter(List<Module> screensList) {
-    screensList.sort(
+  GoRouter createGoRouter(List<Module> moduleList) {
+    moduleList.sort(
       (a, b) => a.displayPosition!.compareTo(b.displayPosition!),
     );
+    screensList.addAll(moduleList);
     var routesList = <GoRoute>[];
     routesList.add(GoRoute(
       path: "/dashboard",

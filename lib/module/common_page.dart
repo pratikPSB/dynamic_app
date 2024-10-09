@@ -38,10 +38,13 @@ class _CommonPageState extends State<CommonPage> {
   final List<TextControllerModel> textControllerList = [];
   final List<String> defaultDropDownList = ["Loading..."];
   final Map<String, dynamic> jsonData = {};
+  var currentPageIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    currentPageIndex = screensList
+        .indexWhere((element) => element.displayPosition == widget.screenData.displayPosition);
     callInitialAPIs();
     widget.screenData.controls?.forEachIndexed((parentIndex, row) {
       widget.screenData.controls![parentIndex].fields!.forEachIndexed(
@@ -253,9 +256,8 @@ class _CommonPageState extends State<CommonPage> {
 
   handleButtonPress(FieldElement componentData) async {
     if (formKey.currentState!.validate()) {
-      if (componentData.validations != null) {
-        fillJsonData();
-        // context.pop();
+      // if (componentData.validations != null) {
+      // context.pop();
         if (componentData.onClickEvent != null) {
           for (var element in componentData.onClickEvent!) {
             fillJsonData();
@@ -267,8 +269,10 @@ class _CommonPageState extends State<CommonPage> {
             }
           }
         }
-        context.pop();
+      if (screensList.elementAtOrNull(currentPageIndex + 1) != null) {
+        context.push("/${screensList.elementAt(currentPageIndex + 1).routeUrl}");
       }
+      // }
     }
   }
 
