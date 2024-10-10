@@ -7,6 +7,7 @@ class FirebaseRemoteConfigKeys {
   static const String appConfig = 'app_config';
   static const String appScreens = 'app_screens';
   static const String appModulesByClient = 'app_modules_by_client';
+  static const String appStrings = 'app_strings';
 }
 
 class FirebaseRemoteConfigService {

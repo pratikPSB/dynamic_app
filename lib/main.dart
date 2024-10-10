@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +27,7 @@ AppModuleByClientModel? appScreensModel;
 late DioService liveServerService;
 late DioService mockServerService;
 List<Module> screensList = List.empty(growable: true);
+Map<String, dynamic> appStringMap = {};
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +51,8 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   late TextStyle styleLight;
   late TextStyle styleDark;
   late GoRouter router;
+  Map<String, dynamic> appLocale = {};
+  List<dynamic> appStrings = List.empty(growable: true);
 
   @override
   void initState() {
@@ -61,6 +66,12 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
     String appConfigNewString =
         FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appModulesByClient);
     appScreensModel = appModuleByClientModelFromJson(appConfigNewString);
+
+    String appStringsRes =
+        FirebaseRemoteConfigService().getString(FirebaseRemoteConfigKeys.appStrings);
+    appLocale = json.decode(appStringsRes);
+    appStrings = appLocale["app_strings"];
+    Logger.doLog(appLocale["app_strings"]);
 
     lightColorScheme = SeedColorScheme.fromSeeds(
       brightness: Brightness.light,
@@ -98,11 +109,19 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     ThemeUtils.notifier.value = ThemeUtils.getThemeMode();
     ThemeUtils.changeTheme(true);
+    ThemeUtils.changeLocale("en");
     ConstFunctions.enableHapticFeedback();
 
-    return ValueListenableBuilder(
-      valueListenable: ThemeUtils.notifier,
-      builder: (_, themeMode, __) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([ThemeUtils.notifier, ThemeUtils.locale]),
+      builder: (context, child) {
+        appStringMap = appStrings.firstWhere(
+          (element) => element["lang_code"] == ThemeUtils.locale,
+          orElse: () => appStrings.firstWhere(
+            (element) => element["lang_code"] == "en",
+          ),
+        );
+        Logger.doLog(appStringMap["lang_code"]);
         return LayoutBuilder(builder: (context, constraints) {
           return OrientationBuilder(builder: (context, orientation) {
             SizeConfig().init(constraints, orientation);
@@ -114,12 +133,18 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                 textStyle: styleLight,
                 configTextStyle: appConfigModel!.appTheme!.textStyle!,
               ),
+              supportedLocales: (appLocale["supported_languages"] as List<dynamic>).map(
+                (localeCode) {
+                  return Locale(localeCode);
+                },
+              ).toList(),
+              locale: Locale(ThemeUtils.locale.value),
               darkTheme: ThemeUtils.getTheme(
                   context: context,
                   colorScheme: darkColorScheme,
                   textStyle: styleDark,
                   configTextStyle: appConfigModel!.appTheme!.textStyle!),
-              themeMode: themeMode,
+              themeMode: ThemeUtils.notifier.value,
               title: 'Flutter Demo',
               routerConfig: router,
             );
@@ -150,11 +175,19 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
             title: screenData.displayName!,
             screenData: screenData,
           ),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-              FadeTransition(
-            opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
-            child: child,
-          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(1.0, 0.0); // Start from the right
+            const end = Offset.zero; // End at the center (current screen)
+            const curve = Curves.easeInOut;
+
+            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            var offsetAnimation = animation.drive(tween);
+
+            return SlideTransition(
+              position: offsetAnimation,
+              child: child,
+            );
+          },
         ),
       );
     }).toList());

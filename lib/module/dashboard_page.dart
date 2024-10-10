@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:vfs_dynamic_app/data/model/app_modules_by_client_model.dart';
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
 
+import '../main.dart';
+
 class DashboardPage extends StatefulWidget {
   final List<Module> moduleList;
 
@@ -37,7 +39,7 @@ class _DashboardPageState extends State<DashboardPage> {
               contentPadding: const EdgeInsetsDirectional.only(start: 10),
               horizontalTitleGap: 10,
               minVerticalPadding: 20,
-              title: Text(model.displayName!),
+              title: Text(appStringMap[model.displayName] ?? model.displayName),
               onTap: () {
                 context.push("/${model.routeUrl}");
               },

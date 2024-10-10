@@ -131,4 +131,17 @@ class ThemeUtils {
       return brightness == Brightness.dark;
     }
   }
+
+  static final ValueNotifier<String> locale = ValueNotifier(getLocale());
+
+  static void changeLocale(String? localeString) {
+    Prefs().setString(ConstKeys.prefKeyLocale, localeString ?? "en");
+    locale.value = localeString ?? "en";
+  }
+
+  static String getLocale() {
+    return Prefs().getString(ConstKeys.prefKeyLocale).isEmpty
+        ? "en"
+        : Prefs().getString(ConstKeys.prefKeyLocale);
+  }
 }

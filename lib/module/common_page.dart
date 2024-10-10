@@ -104,7 +104,8 @@ class _CommonPageState extends State<CommonPage> {
         fieldType.fieldType == "datepicker") {
       if (fieldType.fieldType == "searchable-dropdown") {
         if (fieldType.defaultValueOptionSet!.isEmpty) {
-          fieldType.defaultValueOptionSet?.add("Loading ${fieldType.displayName}");
+          fieldType.defaultValueOptionSet
+              ?.add("Loading ${appStringMap[fieldType.displayName] ?? fieldType.displayName}");
         }
         textControllerList.add(
           TextControllerModel(
@@ -180,16 +181,16 @@ class _CommonPageState extends State<CommonPage> {
             decoration: InputDecoration(
               labelText: (mandatory != null)
                   ? (mandatory)
-                      ? "${componentData.displayName} *"
-                      : componentData.displayName
-                  : componentData.displayName,
+                      ? "${appStringMap[componentData.displayName] ?? componentData.displayName} *"
+                      : appStringMap[componentData.displayName] ?? componentData.displayName
+                  : appStringMap[componentData.displayName] ?? componentData.displayName,
               border: OutlineInputBorder(
                 borderRadius: 10.modifyCorners(),
                 borderSide: BorderSide(
                   color: context.getTheme().primaryColor,
                 ),
               ),
-              hintText: componentData.displayName,
+              hintText: appStringMap[componentData.displayName] ?? componentData.displayName,
             ),
             keyboardType: TextInputType.text,
             textInputAction: TextInputAction.next,
@@ -247,7 +248,7 @@ class _CommonPageState extends State<CommonPage> {
         child: FadingMarqueeWidget(
           pause: const Duration(milliseconds: 0),
           child: Text(
-            componentData.displayName!,
+            appStringMap[componentData.displayName] ?? componentData.displayName,
           ),
         ),
       ),
@@ -255,9 +256,12 @@ class _CommonPageState extends State<CommonPage> {
   }
 
   handleButtonPress(FieldElement componentData) async {
-    if (formKey.currentState!.validate()) {
-      // if (componentData.validations != null) {
-      // context.pop();
+    if (componentData.logicalName == "goBack") {
+      context.pop();
+    } else {
+      if (formKey.currentState!.validate()) {
+        // if (componentData.validations != null) {
+        // context.pop();
         if (componentData.onClickEvent != null) {
           for (var element in componentData.onClickEvent!) {
             fillJsonData();
@@ -269,8 +273,10 @@ class _CommonPageState extends State<CommonPage> {
             }
           }
         }
-      if (screensList.elementAtOrNull(currentPageIndex + 1) != null) {
-        context.push("/${screensList.elementAt(currentPageIndex + 1).routeUrl}");
+
+        if (screensList.elementAtOrNull(currentPageIndex + 1) != null) {
+          context.push("/${screensList.elementAt(currentPageIndex + 1).routeUrl}");
+        }
       }
       // }
     }

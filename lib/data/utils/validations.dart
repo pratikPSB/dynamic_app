@@ -1,5 +1,7 @@
 import 'package:vfs_dynamic_app/data/model/app_modules_by_client_model.dart';
 
+import '../../main.dart';
+
 String? validateEditText(String? value, Validations validation) {
   if (_validateMandatory(validation.mandatory, value) != null) {
     return _validateMandatory(validation.mandatory, value);
@@ -30,7 +32,7 @@ String? _validateValue(MaxValue? regex, String? value) {
       try {
         final regExp = RegExp(regex.value!);
         if (!regExp.hasMatch(value!)) {
-          return regex.message!;
+          return appStringMap[regex.message] ?? regex.message!;
         } else {
           return null;
         }
@@ -51,7 +53,7 @@ String? _validateMandatory(Mandatory? mandatory, String? value) {
       if (mandatory.value is bool) {
         if (mandatory.value) {
           if (value!.isEmpty) {
-            return mandatory.message!;
+            return appStringMap[mandatory.message] ?? mandatory.message!;
           } else {
             return null;
           }
@@ -73,9 +75,11 @@ String? _validateLength(Length? regex, String? value, {bool? isForMin}) {
   if (regex != null) {
     if (regex.value != null) {
       if (regex.value is int) {
-        return _checkMinMaxLength(regex.value!, regex.message!, value, isForMin);
+        return _checkMinMaxLength(
+            regex.value!, appStringMap[regex.message] ?? regex.message!, value, isForMin);
       } else if (int.tryParse(regex.value!) != null) {
-        return _checkMinMaxLength(int.parse(regex.value!), regex.message!, value, isForMin);
+        return _checkMinMaxLength(int.parse(regex.value!),
+            appStringMap[regex.message] ?? regex.message!, value, isForMin);
       } else {
         return null;
       }
