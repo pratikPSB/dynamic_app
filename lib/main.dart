@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:vfs_dynamic_app/data/model/app_config_model.dart' hide TextStyle;
 import 'package:vfs_dynamic_app/data/model/app_modules_by_client_model.dart';
 import 'package:vfs_dynamic_app/data/utils/extensions.dart';
+import 'package:vfs_dynamic_app/data/utils/fallback_cupertino_localization_delegate.dart';
+import 'package:vfs_dynamic_app/data/utils/fallback_material_localization_delegate.dart';
 import 'package:vfs_dynamic_app/data/utils/logger.dart';
 import 'package:vfs_dynamic_app/data/utils/prefs_utils.dart';
 import 'package:vfs_dynamic_app/module/common_page.dart';
@@ -109,14 +111,16 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     ThemeUtils.notifier.value = ThemeUtils.getThemeMode();
     ThemeUtils.changeTheme(true);
-    ThemeUtils.changeLocale("en");
+    ThemeUtils.changeLocale("fr");
     ConstFunctions.enableHapticFeedback();
 
     return AnimatedBuilder(
       animation: Listenable.merge([ThemeUtils.notifier, ThemeUtils.locale]),
       builder: (context, child) {
         appStringMap = appStrings.firstWhere(
-          (element) => element["lang_code"] == ThemeUtils.locale,
+          (element) {
+            return element["lang_code"] == ThemeUtils.locale.value;
+          },
           orElse: () => appStrings.firstWhere(
             (element) => element["lang_code"] == "en",
           ),
@@ -139,6 +143,10 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                 },
               ).toList(),
               locale: Locale(ThemeUtils.locale.value),
+              localizationsDelegates: [
+                FallbackMaterialLocalizationDelegate(),
+                FallbackCupertinoLocalizationDelegate(),
+              ],
               darkTheme: ThemeUtils.getTheme(
                   context: context,
                   colorScheme: darkColorScheme,
@@ -172,7 +180,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
         path: routeName,
         pageBuilder: (context, state) => CustomTransitionPage(
           child: CommonPage(
-            title: screenData.displayName!,
+            title: appStringMap[screenData.displayName] ?? screenData.displayName!,
             screenData: screenData,
           ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
