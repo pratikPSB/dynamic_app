@@ -111,7 +111,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     ThemeUtils.notifier.value = ThemeUtils.getThemeMode();
     ThemeUtils.changeTheme(true);
-    ThemeUtils.changeLocale("fr");
+    ThemeUtils.changeLocale("en");
     ConstFunctions.enableHapticFeedback();
 
     return AnimatedBuilder(
