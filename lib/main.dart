@@ -77,6 +77,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
     lightColorScheme = SeedColorScheme.fromSeeds(
       brightness: Brightness.light,
+      primary: Color("#F85B30".getColorHexFromStr()),
       primaryKey: Color(appConfigModel!.appTheme!.lightThemeColors!.primary!.getColorHexFromStr()),
       secondaryKey:
           Color(appConfigModel!.appTheme!.lightThemeColors!.secondary!.getColorHexFromStr()),
@@ -87,6 +88,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
     darkColorScheme = SeedColorScheme.fromSeeds(
       brightness: Brightness.dark,
+      primary: Color("#F85B30".getColorHexFromStr()),
       primaryKey: Color(appConfigModel!.appTheme!.darkThemeColors!.primary!.getColorHexFromStr()),
       secondaryKey:
           Color(appConfigModel!.appTheme!.darkThemeColors!.secondary!.getColorHexFromStr()),
